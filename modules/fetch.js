@@ -111,7 +111,7 @@ export const getFanArt = async mbid => {
 };
 
 export const getAudioDB = async artist => {
-  await sleep(200); // rate-limit :(
+  await sleep(1500);
   const response = await fetch(
     `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(
       artist
@@ -124,14 +124,23 @@ export const getAudioDB = async artist => {
       return artists[0].strArtistThumb || artists[0].strArtistFanart;
     }
   }
+  if (response.status === 105) { // or whatever status it is
+    // we are being rate-limited; let's wait a while
+    console.log(kleur.bgRed("Rate limited, sleeping for a while"));
+    await sleep (1000 * 60); // 1 minute should do it?
+    // retry this
+    return getAudioDB(artist);
+  }
   throw Error('no art found in provider audiodb');
 };
 
 export const downloadImageForMBIDs = async map => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
-    console.log(`downloading ${kleur.green(url)} ...`);
-    const res = await fetch(url);
-    writeBlob(key, res);
+    if (url) {
+      console.log(`downloading ${kleur.green(url)} ...`);
+      const res = await fetch(url);
+      writeBlob(key, res);
+    }
   });
 };

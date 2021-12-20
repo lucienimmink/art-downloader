@@ -10,10 +10,15 @@ export const writeMap = async (map, type) => {
 
 export const writeBlob = async (key, res) => {
   const webp = sharp().webp();
-  res.body.pipe(webp).pipe(fsSync.createWriteStream(`output/art/${key}.webp`));
+  try {
+    res.body.pipe(webp).pipe(fsSync.createWriteStream(`output/art/${key}.webp`));
+  } catch (e) {
+    console.log(`Error converting image to webp, writing original instead`);
+    res.body.pipe(fsSync.createWriteStream(`output/art/${key}.jpg`));
+  }
 };
 
 export const isAlreadyDownloaded = async mbid => {
   const alreadyDownloadedFiles = await fs.readdir('output/art');
-  return alreadyDownloadedFiles.includes(`${mbid}.jpg`);
+  return alreadyDownloadedFiles.includes(`${mbid}.webp`);
 };
