@@ -1,13 +1,17 @@
-import kleur from "kleur";
-import { readPackage } from "read-pkg";
+import kleur from 'kleur';
+import { readPackage } from 'read-pkg';
 import {
   readMusicFile,
   readArtistJSON,
   populateArtistMap,
   populateAlbumMap,
-} from "./modules/read.js";
-import { getMBIDForArtists, getArtForArtists, downloadImageForMBIDs } from "./modules/fetch.js";
-import { writeMap } from "./modules/write.js";
+} from './modules/read.js';
+import {
+  getMBIDForArtists,
+  getArtForArtists,
+  downloadImageForMBIDs,
+} from './modules/fetch.js';
+import { writeMap } from './modules/write.js';
 
 readPackage().then(async ({ name, version }) => {
   console.log(kleur.green(`starting ${name} v${version}`));
@@ -24,7 +28,7 @@ readPackage().then(async ({ name, version }) => {
   console.log(`Found ${kleur.green(cachedArtists.size)} cached artists`);
   const mergedArtists = new Map([...artistMap, ...cachedArtists]);
   await getMBIDForArtists(mergedArtists);
-  writeMap(mergedArtists, "artist");
+  writeMap(mergedArtists, 'artist');
   const urlsForMBIDs = await getArtForArtists(mergedArtists);
   console.log(`Going to download ${kleur.green(urlsForMBIDs.size)} URLs`);
   await downloadImageForMBIDs(urlsForMBIDs);

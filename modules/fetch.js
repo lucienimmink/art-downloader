@@ -1,21 +1,21 @@
-import fetch from "node-fetch";
-import ora from "ora";
-import kleur from "kleur";
-import dotenv from "dotenv";
+import fetch from 'node-fetch';
+import ora from 'ora';
+import kleur from 'kleur';
+import dotenv from 'dotenv';
 dotenv.config();
 
-import { asyncForEach, sleep } from "./helpers.js";
-import { writeBlob, isAlreadyDownloaded } from "./write.js";
+import { asyncForEach, sleep } from './helpers.js';
+import { writeBlob, isAlreadyDownloaded } from './write.js';
 
 const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
 
-export const getMBIDForArtists = async (map) => {
+export const getMBIDForArtists = async map => {
   const start = new Date().getTime();
   const percent = Math.floor(map.size / 100);
   let count = 0;
   let fetched = 0;
-  const spinner = ora("Fetching meta data for artists").start();
-  await asyncForEach(Array.from(map.keys()), async (key) => {
+  const spinner = ora('Fetching meta data for artists').start();
+  await asyncForEach(Array.from(map.keys()), async key => {
     const hasMBID = !!map.get(key);
     if (!hasMBID) {
       try {
@@ -33,7 +33,7 @@ export const getMBIDForArtists = async (map) => {
     }
     count++;
     if (count % percent === 0) {
-      spinner.color = "yellow";
+      spinner.color = 'yellow';
       spinner.text = `Fetching meta data for artists - ${
         count / percent
       }% done`;
@@ -48,9 +48,9 @@ export const getMBIDForArtists = async (map) => {
   );
 };
 
-export const getArtForArtists = async (map) => {
+export const getArtForArtists = async map => {
   const MBIDToUrlMap = new Map();
-  await asyncForEach(Array.from(map.keys()), async (key) => {
+  await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
     const hasMBID = !!mbid;
     if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
@@ -78,15 +78,15 @@ export const getArtForArtists = async (map) => {
 
 const getMetaInfo = async ({ artist, album }) => {
   const searchParams = new URLSearchParams();
-  searchParams.set("api_key", LASTFMAPIKEY);
-  searchParams.set("artist", artist);
-  searchParams.set("format", "json");
-  searchParams.set("autoCorrect", "true");
+  searchParams.set('api_key', LASTFMAPIKEY);
+  searchParams.set('artist', artist);
+  searchParams.set('format', 'json');
+  searchParams.set('autoCorrect', 'true');
   if (album) {
-    searchParams.set("method", "album.getinfo");
-    searchParams.set("album", album);
+    searchParams.set('method', 'album.getinfo');
+    searchParams.set('album', album);
   } else {
-    searchParams.set("method", "artist.getinfo");
+    searchParams.set('method', 'artist.getinfo');
   }
   const response = await fetch(
     `https://ws.audioscrobbler.com/2.0/?${searchParams}`
@@ -95,7 +95,7 @@ const getMetaInfo = async ({ artist, album }) => {
   return json;
 };
 
-export const getFanArt = async (mbid) => {
+export const getFanArt = async mbid => {
   await sleep(200); // rate-limit :(
   const response = await fetch(
     `https://webservice.fanart.tv/v3/music/${mbid}&?api_key=${FANARTAPIKEY}&format=json`
@@ -107,10 +107,10 @@ export const getFanArt = async (mbid) => {
       return artistthumb[0].url;
     }
   }
-  throw Error("no art found in provider fanart");
+  throw Error('no art found in provider fanart');
 };
 
-export const getAudioDB = async (artist) => {
+export const getAudioDB = async artist => {
   await sleep(200); // rate-limit :(
   const response = await fetch(
     `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(
@@ -124,11 +124,11 @@ export const getAudioDB = async (artist) => {
       return artists[0].strArtistThumb || artists[0].strArtistFanart;
     }
   }
-  throw Error("no art found in provider audiodb");
+  throw Error('no art found in provider audiodb');
 };
 
-export const downloadImageForMBIDs = async (map) => {
-  await asyncForEach(Array.from(map.keys()), async (key) => {
+export const downloadImageForMBIDs = async map => {
+  await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
     console.log(`downloading ${kleur.green(url)} ...`);
     const res = await fetch(url);

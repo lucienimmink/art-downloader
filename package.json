@@ -5,7 +5,10 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint:prettier": "prettier \"**/*.js\" --check --ignore-path .gitignore",
+    "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
+    "lint": "npm run lint:prettier",
+    "format": "npm run format:prettier",
     "start": "node index.js"
   },
   "repository": {
@@ -36,14 +39,12 @@
     }
   },
   "lint-staged": {
-    "*.ts": [
-      "eslint --fix",
+    "*.js": [
       "prettier --write",
       "git add"
     ]
   },
   "devDependencies": {
-    "eslint": "^8.5.0",
     "husky": "^7.0.4",
     "lint-staged": "^12.1.3",
     "prettier": "^2.5.1"

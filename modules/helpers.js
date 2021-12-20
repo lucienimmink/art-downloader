@@ -4,6 +4,6 @@ export const asyncForEach = async (array, callback) => {
   }
 };
 
-export const sleep = (milliseconds) => {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+export const sleep = milliseconds => {
+  return new Promise(resolve => setTimeout(resolve, milliseconds));
 };
