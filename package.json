@@ -1,0 +1,28 @@
+{
+  "name": "art-downloader",
+  "version": "1.0.0",
+  "description": "download artist and album art based on the MBID",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lucienimmink/art-downloader.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lucienimmink/art-downloader/issues"
+  },
+  "homepage": "https://github.com/lucienimmink/art-downloader#readme",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "kleur": "^4.1.4",
+    "node-fetch": "^3.1.0",
+    "ora": "^6.0.1",
+    "read-pkg": "^7.0.0"
+  }
+}
