@@ -50,29 +50,53 @@ export const getMBIDForArtists = async map => {
 
 export const getArtForArtists = async map => {
   const MBIDToUrlMap = new Map();
+  const start = new Date().getTime();
+  const percent = Math.floor(map.size / 100);
+  let count = 0;
+  let fetched = 0;
+  const spinner = ora('Fetching album art for artists').start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
     const hasMBID = !!mbid;
     if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
       try {
         const url = await getFanArt(mbid);
+        fetched++;
         MBIDToUrlMap.set(mbid, url);
       } catch (e) {
         // not found in FanArt
         try {
           const url = await getAudioDB(key);
+          fetched++;
           MBIDToUrlMap.set(mbid, url);
         } catch (e) {
           // not found in AudioDB
+
+          /*
           console.log(
             `cannot find art for ${kleur.red(key)}, the MBID is ${kleur.yellow(
               mbid
             )}`
           );
+          */
         }
       }
     }
+    count++;
+    if (count % percent === 0) {
+      spinner.color = 'yellow';
+      spinner.text = `Fetching album art for artists - ${
+        count / percent
+      }% done`;
+    }
   });
+  const stop = new Date().getTime();
+  spinner.stop();
+  console.log(
+    `Fetched ${kleur.green(fetched)} art in ${kleur.yellow(
+      (stop - start) / 1000
+    )}s`
+  );
   return MBIDToUrlMap;
 };
 
@@ -124,10 +148,11 @@ export const getAudioDB = async artist => {
       return artists[0].strArtistThumb || artists[0].strArtistFanart;
     }
   }
-  if (response.status === 429) { // or whatever status it is
+  if (response.status === 429) {
+    // or whatever status it is
     // we are being rate-limited; let's wait a while
-    console.log(kleur.bgRed("Rate limited, sleeping for a while"));
-    await sleep (1000 * 60); // 1 minute should do it?
+    console.log(kleur.bgRed('Rate limited, sleeping for a while'));
+    await sleep(1000 * 60); // 1 minute should do it?
     // retry this
     return getAudioDB(artist);
   }
