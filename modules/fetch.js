@@ -4,7 +4,7 @@ import kleur from "kleur";
 import dotenv from "dotenv";
 dotenv.config();
 
-import { asyncForEach } from "./helpers.js";
+import { asyncForEach, sleep } from "./helpers.js";
 import { writeBlob, isAlreadyDownloaded } from "./write.js";
 
 const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
@@ -19,12 +19,16 @@ export const getMBIDForArtists = async (map) => {
     const hasMBID = !!map.get(key);
     if (!hasMBID) {
       try {
-          const { artist } = await getMetaInfo({ artist: key });
-          const mbid = artist?.mbid;
-          map.set(key, mbid);
-          fetched++;
+        const { artist } = await getMetaInfo({ artist: key });
+        const mbid = artist?.mbid;
+        map.set(key, mbid);
+        fetched++;
       } catch (e) {
-        console.log(`encountered an error while getting meta-info for ${kleur.yellow(key)} with MBID ${kleur.yellow(mbid)}`)
+        console.log(
+          `encountered an error while getting meta-info for ${kleur.yellow(
+            key
+          )} with MBID ${kleur.yellow(mbid)}`
+        );
       }
     }
     count++;
@@ -49,7 +53,7 @@ export const getArtForArtists = async (map) => {
   await asyncForEach(Array.from(map.keys()), async (key) => {
     const mbid = map.get(key);
     const hasMBID = !!mbid;
-    if (hasMBID && ! await isAlreadyDownloaded(mbid)) {
+    if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
       try {
         const url = await getFanArt(mbid);
         MBIDToUrlMap.set(mbid, url);
@@ -60,7 +64,11 @@ export const getArtForArtists = async (map) => {
           MBIDToUrlMap.set(mbid, url);
         } catch (e) {
           // not found in AudioDB
-          console.log(`cannot find art for ${kleur.red(key)}, the MBID is ${kleur.yellow(mbid)}`);
+          console.log(
+            `cannot find art for ${kleur.red(key)}, the MBID is ${kleur.yellow(
+              mbid
+            )}`
+          );
         }
       }
     }
@@ -87,8 +95,8 @@ const getMetaInfo = async ({ artist, album }) => {
   return json;
 };
 
-
 export const getFanArt = async (mbid) => {
+  await sleep(200); // rate-limit :(
   const response = await fetch(
     `https://webservice.fanart.tv/v3/music/${mbid}&?api_key=${FANARTAPIKEY}&format=json`
   );
@@ -103,6 +111,7 @@ export const getFanArt = async (mbid) => {
 };
 
 export const getAudioDB = async (artist) => {
+  await sleep(200); // rate-limit :(
   const response = await fetch(
     `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(
       artist
@@ -125,4 +134,4 @@ export const downloadImageForMBIDs = async (map) => {
     const res = await fetch(url);
     writeBlob(key, res);
   });
-}
+};

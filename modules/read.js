@@ -28,9 +28,9 @@ export const populateAlbumMap = (data) => {
   return map;
 };
 
-const extractArtistFromLine = ({ artist }, map) => {
-  map.set(artist, null);
+const extractArtistFromLine = ({ albumartist, artist }, map) => {
+  map.set(albumartist || artist, null);
 };
-const extractAlbumFromLine = ({ artist, album }, map) => {
-  map.set(`${artist}|||${album}`, null);
+const extractAlbumFromLine = ({ albumartist, artist, album }, map) => {
+  map.set(`${albumartist || artist}|||${album}`, null);
 };

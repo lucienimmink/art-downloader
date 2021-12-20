@@ -1,5 +1,6 @@
 import * as fs from "fs/promises";
 import * as fsSync from "fs";
+import sharp from "sharp";
 
 export const writeMap = async (map, type) => {
     const obj = Object.fromEntries(map);
@@ -8,7 +9,8 @@ export const writeMap = async (map, type) => {
 };
 
 export const writeBlob = async (key, res) => {
-  res.body.pipe(fsSync.createWriteStream(`output/art/${key}.jpg`));
+  const webp = sharp().webp();
+  res.body.pipe(webp).pipe(fsSync.createWriteStream(`output/art/${key}.webp`));
 }
 
 export const isAlreadyDownloaded = async (mbid) => {
