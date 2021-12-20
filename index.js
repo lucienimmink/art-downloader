@@ -4,7 +4,6 @@ import {
   readMusicFile,
   readArtistJSON,
   populateArtistMap,
-  populateAlbumMap,
 } from './modules/read.js';
 import {
   getMBIDForArtists,
@@ -17,12 +16,7 @@ readPackage().then(async ({ name, version }) => {
   console.log(kleur.green(`starting ${name} v${version}`));
   const data = await readMusicFile();
   const artistMap = populateArtistMap(data);
-  const albumMap = populateAlbumMap(data);
-  console.log(
-    `Found ${kleur.green(artistMap.size)} artists and ${kleur.green(
-      albumMap.size
-    )} albums`
-  );
+  console.log(`Found ${kleur.green(artistMap.size)} artists`);
   const cachedArtistsJSON = await readArtistJSON();
   const cachedArtists = new Map(Object.entries(JSON.parse(cachedArtistsJSON)));
   console.log(`Found ${kleur.green(cachedArtists.size)} cached artists`);
