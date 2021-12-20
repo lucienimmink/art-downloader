@@ -124,7 +124,7 @@ export const getAudioDB = async artist => {
       return artists[0].strArtistThumb || artists[0].strArtistFanart;
     }
   }
-  if (response.status === 105) { // or whatever status it is
+  if (response.status === 429) { // or whatever status it is
     // we are being rate-limited; let's wait a while
     console.log(kleur.bgRed("Rate limited, sleeping for a while"));
     await sleep (1000 * 60); // 1 minute should do it?
