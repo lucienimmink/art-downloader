@@ -11,7 +11,7 @@ const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
 
 export const getMBIDForArtists = async map => {
   const start = new Date().getTime();
-  const percent = Math.floor(map.size / 100);
+  const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
   const spinner = ora('Fetching meta data for artists').start();
@@ -20,7 +20,10 @@ export const getMBIDForArtists = async map => {
     if (!hasMBID) {
       try {
         const { artist } = await getMetaInfo({ artist: key });
-        const mbid = artist?.mbid;
+        let mbid = artist?.mbid;
+        if (!mbid) {
+          mbid = await getMBID(key)
+        }
         map.set(key, mbid);
         fetched++;
       } catch (e) {
@@ -51,7 +54,7 @@ export const getMBIDForArtists = async map => {
 export const getArtForArtists = async map => {
   const MBIDToUrlMap = new Map();
   const start = new Date().getTime();
-  const percent = Math.floor(map.size / 100);
+  const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
   const spinner = ora('Fetching album art for artists').start();
@@ -119,6 +122,16 @@ const getMetaInfo = async ({ artist, album }) => {
   return json;
 };
 
+const getMBID = async (artist) => {
+  await sleep(1000); // https://wiki.musicbrainz.org/MusicBrainz_API/Rate_Limiting
+  const searchParams = new URLSearchParams();
+  searchParams.set("fmt", "json");
+  searchParams.set("query", artist);
+  const response = await fetch(`https://musicbrainz.org/ws/2/artist/?${searchParams}`);
+  const { artists } = await response.json();
+  return artists[0].id;
+}
+
 export const getFanArt = async mbid => {
   await sleep(200); // rate-limit :(
   const response = await fetch(
@@ -163,6 +176,7 @@ export const downloadImageForMBIDs = async map => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
     if (url) {
+      sleep(200);
       console.log(`downloading ${kleur.green(url)} ...`);
       const res = await fetch(url);
       writeBlob(key, res);
