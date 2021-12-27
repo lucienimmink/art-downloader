@@ -53,6 +53,7 @@ export const getMBIDForArtists = async map => {
 
 export const getArtForArtists = async map => {
   const MBIDToUrlMap = new Map();
+  const ArtistsWithoutArt = new Map();
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
@@ -74,14 +75,7 @@ export const getArtForArtists = async map => {
           MBIDToUrlMap.set(mbid, url);
         } catch (e) {
           // not found in AudioDB
-
-          /*
-          console.log(
-            `cannot find art for ${kleur.red(key)}, the MBID is ${kleur.yellow(
-              mbid
-            )}`
-          );
-          */
+          ArtistsWithoutArt.set(key, mbid);
         }
       }
     }
@@ -100,7 +94,7 @@ export const getArtForArtists = async map => {
       (stop - start) / 1000
     )}s`
   );
-  return MBIDToUrlMap;
+  return { MBIDToUrlMap, ArtistsWithoutArt };
 };
 
 const getMetaInfo = async ({ artist, album }) => {

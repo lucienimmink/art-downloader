@@ -1,10 +1,10 @@
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
 
-export const writeMap = async (map, type) => {
+export const writeMap = async (map, name = 'artists') => {
   const obj = Object.fromEntries(map);
   const json = JSON.stringify(obj);
-  await fs.writeFile('output/artists.json', json);
+  await fs.writeFile(`output/${name}.json`, json);
 };
 
 export const writeBlob = async (key, res) => {

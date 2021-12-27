@@ -25,9 +25,10 @@ readPackage().then(async ({ name, version }) => {
   console.log(`Found ${kleur.green(cachedArtists.size)} cached artists`);
   const mergedArtists = new Map([...artistMap, ...cachedArtists]);
   await getMBIDForArtists(mergedArtists);
-  writeMap(mergedArtists, 'artist');
-  const urlsForMBIDs = await getArtForArtists(mergedArtists);
-  console.log(`Going to download ${kleur.green(urlsForMBIDs.size)} URLs`);
-  await downloadImageForMBIDs(urlsForMBIDs);
+  writeMap(mergedArtists, 'artists');
+  const { MBIDToUrlMap, ArtistsWithoutArt } = await getArtForArtists(mergedArtists);
+  console.log(`Going to download ${kleur.green(MBIDToUrlMap.size)} URLs`);
+  await downloadImageForMBIDs(MBIDToUrlMap);
+  await writeMap(ArtistsWithoutArt, "artists-without-art");
   console.log(`${kleur.green(`All is done!`)}`);
 });
