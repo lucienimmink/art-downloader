@@ -1,7 +1,11 @@
 import * as fs from 'fs/promises';
+import dotenv from 'dotenv';
+dotenv.config();
+
+const { MUSIC_FILE } = process.env;
 
 export const readMusicFile = async () => {
-  return await fs.readFile(`src/node-music.json`, 'utf8');
+  return await fs.readFile(MUSIC_FILE || `src/node-music.json`, 'utf8');
 };
 
 export const readArtistJSON = async () => {
