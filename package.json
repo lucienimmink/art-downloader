@@ -1,6 +1,6 @@
 {
   "name": "art-downloader",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "download artist and album art based on the MBID",
   "main": "index.js",
   "type": "module",
