@@ -9,7 +9,8 @@
     "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
     "lint": "npm run lint:prettier",
     "format": "npm run format:prettier",
-    "start": "node index.js"
+    "start": "node index.js",
+    "postversion": "git push && git puhs --tags"
   },
   "repository": {
     "type": "git",
