@@ -17,6 +17,9 @@ export const populateArtistMap = data => {
   for (const line of JSON.parse(data)) {
     extractArtistFromLine(line, map);
   }
+  if (map.has(null)) {
+    map.delete(null);
+  }
   return map;
 };
 

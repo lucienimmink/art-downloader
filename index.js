@@ -17,7 +17,7 @@ readPackage().then(async ({ name, version }) => {
   const data = await readMusicFile();
   const artistMap = populateArtistMap(data);
   console.log(`Found ${kleur.green(artistMap.size)} artists`);
-  let cachedArtistsJSON = "{}";
+  let cachedArtistsJSON = '{}';
   try {
     cachedArtistsJSON = await readArtistJSON();
   } catch (e) {}
@@ -26,9 +26,18 @@ readPackage().then(async ({ name, version }) => {
   const mergedArtists = new Map([...artistMap, ...cachedArtists]);
   await getMBIDForArtists(mergedArtists);
   writeMap(mergedArtists, 'artists');
-  const { MBIDToUrlMap, ArtistsWithoutArt } = await getArtForArtists(mergedArtists);
-  console.log(`Going to download ${kleur.green(MBIDToUrlMap.size)} URLs`);
-  await downloadImageForMBIDs(MBIDToUrlMap);
-  await writeMap(ArtistsWithoutArt, "artists-without-art");
+  const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(
+    mergedArtists
+  );
+  console.log(`Going to download ${kleur.green(mBIDToUrlMap.size)} URLs`);
+  await downloadImageForMBIDs(mBIDToUrlMap);
+  if (artistsWithoutArt.size !== 0) {
+    console.log(
+      `Found ${kleur.red(artistsWithoutArt.size)} artist${
+        artistsWithoutArt.size !== 1 ? 's' : ''
+      } without art`
+    );
+  }
+  await writeMap(artistsWithoutArt, 'artists-without-art');
   console.log(`${kleur.green(`All is done!`)}`);
 });

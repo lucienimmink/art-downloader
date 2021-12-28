@@ -14,7 +14,9 @@ export const getMBIDForArtists = async map => {
   const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
-  const spinner = ora('Fetching meta data for artists').start();
+  const spinner = ora(
+    `Fetching meta data for ${kleur.green(map.size)} artists`
+  ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const hasMBID = !!map.get(key);
     if (!hasMBID) {
@@ -22,7 +24,7 @@ export const getMBIDForArtists = async map => {
         const { artist } = await getMetaInfo({ artist: key });
         let mbid = artist?.mbid;
         if (!mbid) {
-          mbid = await getMBID(key)
+          mbid = await getMBID(key);
         }
         map.set(key, mbid);
         fetched++;
@@ -37,64 +39,74 @@ export const getMBIDForArtists = async map => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Fetching meta data for artists - ${
-        count / percent
-      }% done`;
+      spinner.text = `Fetching meta data for ${kleur.green(
+        map.size
+      )} artists - ${count / percent}% done`;
     }
   });
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Fetched ${kleur.green(fetched)} MBIDs in ${kleur.yellow(
-      (stop - start) / 1000
-    )}s`
+    `Fetched ${kleur.green(fetched)} new MBID${
+      fetched !== 1 ? 's' : ''
+    } in ${kleur.yellow((stop - start) / 1000)}s`
   );
 };
 
 export const getArtForArtists = async map => {
-  const MBIDToUrlMap = new Map();
-  const ArtistsWithoutArt = new Map();
+  const mBIDToUrlMap = new Map();
+  const artistsWithoutArt = new Map();
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
-  const spinner = ora('Fetching album art for artists').start();
+  const spinner = ora(
+    `Fetching album art for ${kleur.green(map.size)} artists`
+  ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
     const hasMBID = !!mbid;
     if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
       try {
         const url = await getFanArt(mbid);
-        fetched++;
-        MBIDToUrlMap.set(mbid, url);
+        if (url) {
+          fetched++;
+          mBIDToUrlMap.set(mbid, url);
+        } else {
+          artistsWithoutArt.set(key, mbid);
+        }
       } catch (e) {
         // not found in FanArt
         try {
           const url = await getAudioDB(key);
-          fetched++;
-          MBIDToUrlMap.set(mbid, url);
+          if (url) {
+            fetched++;
+            mBIDToUrlMap.set(mbid, url);
+          } else {
+            artistsWithoutArt.set(key, mbid);
+          }
         } catch (e) {
           // not found in AudioDB
-          ArtistsWithoutArt.set(key, mbid);
+          artistsWithoutArt.set(key, mbid);
         }
       }
     }
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Fetching album art for artists - ${
-        count / percent
-      }% done`;
+      spinner.text = `Fetching album art for ${kleur.green(
+        map.size
+      )} artists - ${count / percent}% done`;
     }
   });
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Fetched ${kleur.green(fetched)} art in ${kleur.yellow(
+    `Fetched ${kleur.green(fetched)} new art in ${kleur.yellow(
       (stop - start) / 1000
     )}s`
   );
-  return { MBIDToUrlMap, ArtistsWithoutArt };
+  return { mBIDToUrlMap, artistsWithoutArt };
 };
 
 const getMetaInfo = async ({ artist, album }) => {
@@ -116,15 +128,17 @@ const getMetaInfo = async ({ artist, album }) => {
   return json;
 };
 
-const getMBID = async (artist) => {
+const getMBID = async artist => {
   await sleep(1000); // https://wiki.musicbrainz.org/MusicBrainz_API/Rate_Limiting
   const searchParams = new URLSearchParams();
-  searchParams.set("fmt", "json");
-  searchParams.set("query", artist);
-  const response = await fetch(`https://musicbrainz.org/ws/2/artist/?${searchParams}`);
+  searchParams.set('fmt', 'json');
+  searchParams.set('query', artist);
+  const response = await fetch(
+    `https://musicbrainz.org/ws/2/artist/?${searchParams}`
+  );
   const { artists } = await response.json();
   return artists[0].id;
-}
+};
 
 export const getFanArt = async mbid => {
   await sleep(200); // rate-limit :(
