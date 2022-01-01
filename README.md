@@ -6,14 +6,16 @@ Download artist art based on their [MBID](https://musicbrainz.org/). This node.j
 
 The following variables should be set in `.env`:
 
-- `MUSIC_FILE`: full path to your [JSMusicDB](https://www.jsmusicd.com) compatible [music file](https://github.com/lucienimmink/scanner.py)
-- `LASTFMAPIKEY`: your last.fm API key. Used to fetch meta data about the found artist. Mainly used for rapid MBID lookup
+- `MUSIC_FILE`: full path to your [JSMusicDB](https://www.jsmusicd.com) compatible [music file](https://github.com/lucienimmink/scanner.py); defaults to `./src`.
+- `ART_FOLDER`: the output folder for the art images; defaults to `./output/art/`.
+- `LASTFMAPIKEY`: your last.fm API key. Used to fetch meta data about the found artist. Mainly used for rapid MBID lookup.
 - `FANARTAPIKEY`: your fanart API key. Used for looking up missing art at fanart.
 
 ## Output
 
-The output is stored in `./output` and will contain 3 parts:
+Art is downloaded to `ART_FOLDER` or `./output/art/` if `ART_FOLDER` is not specified in `.env`.
 
-- `art` the folder containing all the found art for the artists found in your music file. These are stored by the MBID. The format is as-is-found, same goes for the resolution. Further transformation is up to you.
+The output logs are stored in `./output` and will contain 2 parts:
+
 - `artists.json` a map of all cached artist <> MBID pairs found. This is used to speed up the process next ti you run the application.
 - `artists-without-art.json` a map of all artists <> MBID for which no art could be found, neither cached or online. You can use the MBID to save your own art for example.
