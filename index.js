@@ -4,6 +4,7 @@ import {
   readMusicFile,
   readArtistJSON,
   populateArtistMap,
+  removeDeletedArtistsFromCacheMap
 } from './modules/read.js';
 import {
   getMBIDForArtists,
@@ -22,6 +23,7 @@ readPackage().then(async ({ name, version }) => {
     cachedArtistsJSON = await readArtistJSON();
   } catch (e) {}
   const cachedArtists = new Map(Object.entries(JSON.parse(cachedArtistsJSON)));
+  removeDeletedArtistsFromCacheMap(artistMap, cachedArtists);
   console.log(`Found ${kleur.green(cachedArtists.size)} cached artists`);
   const mergedArtists = new Map([...artistMap, ...cachedArtists]);
   await getMBIDForArtists(mergedArtists);

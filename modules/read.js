@@ -31,6 +31,14 @@ export const populateAlbumMap = data => {
   return map;
 };
 
+export const removeDeletedArtistsFromCacheMap = (map, cache) => {
+  Array.from(cache.keys()).forEach(key => {
+    if (!map.has(key)) {
+      cache.delete(key);
+    }
+  });
+}
+
 const extractArtistFromLine = ({ albumartist, artist }, map) => {
   map.set(albumartist || artist, null);
 };
