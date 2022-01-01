@@ -10,7 +10,7 @@
     "lint": "npm run lint:prettier",
     "format": "npm run format:prettier",
     "start": "node index.js",
-    "postversion": "git push && git puhs --tags"
+    "postversion": "git push && git push --tags"
   },
   "repository": {
     "type": "git",
