@@ -10,7 +10,8 @@
     "lint": "npm run lint:prettier",
     "format": "npm run format:prettier",
     "start": "node index.js",
-    "postversion": "git push && git push --tags"
+    "postversion": "git push && git push --tags",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
