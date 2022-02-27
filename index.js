@@ -4,7 +4,7 @@ import {
   readMusicFile,
   readArtistJSON,
   populateArtistMap,
-  removeDeletedArtistsFromCacheMap
+  removeDeletedArtistsFromCacheMap,
 } from './modules/read.js';
 import {
   getMBIDForArtists,
@@ -14,7 +14,7 @@ import {
 import { writeMap } from './modules/write.js';
 
 readPackage().then(async ({ name, version }) => {
-  console.log(`starting ${kleur.blue(`${name} v${version}`)}`);
+  console.log(`Starting ${kleur.blue(`${name} v${version}`)}`);
   const data = await readMusicFile();
   const artistMap = populateArtistMap(data);
   console.log(`Found ${kleur.green(artistMap.size)} artists`);

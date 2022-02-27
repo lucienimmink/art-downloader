@@ -37,7 +37,7 @@ export const removeDeletedArtistsFromCacheMap = (map, cache) => {
       cache.delete(key);
     }
   });
-}
+};
 
 const extractArtistFromLine = ({ albumartist, artist }, map) => {
   map.set(albumartist || artist, null);
