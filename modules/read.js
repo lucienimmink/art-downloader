@@ -11,6 +11,9 @@ export const readMusicFile = async () => {
 export const readArtistJSON = async () => {
   return await fs.readFile(`output/artists.json`, 'utf8');
 };
+export const readAlbumJSON = async () => {
+  return await fs.readFile(`output/albums.json`, 'utf8');
+};
 
 export const populateArtistMap = data => {
   const map = new Map();
@@ -28,10 +31,13 @@ export const populateAlbumMap = data => {
   for (const line of JSON.parse(data)) {
     extractAlbumFromLine(line, map);
   }
+  if (map.has(null)) {
+    map.delete(null);
+  }
   return map;
 };
 
-export const removeDeletedArtistsFromCacheMap = (map, cache) => {
+export const removeDeletedEntriesFromCacheMap = (map, cache) => {
   Array.from(cache.keys()).forEach(key => {
     if (!map.has(key)) {
       cache.delete(key);

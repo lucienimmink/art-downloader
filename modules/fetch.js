@@ -6,6 +6,7 @@ dotenv.config();
 
 import { asyncForEach, sleep } from './helpers.js';
 import { writeBlob, isAlreadyDownloaded } from './write.js';
+import timeSpan from './hms.js';
 
 const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
 
@@ -49,7 +50,56 @@ export const getMBIDForArtists = async map => {
   console.log(
     `Fetched ${kleur.green(fetched)} new MBID${
       fetched !== 1 ? 's' : ''
-    } in ${kleur.yellow((stop - start) / 1000)}s`
+    } for artists in ${kleur.yellow(timeSpan(stop - start))}`
+  );
+};
+
+export const getMBIDForAlbums = async map => {
+  const start = new Date().getTime();
+  const percent = Math.ceil(map.size / 100);
+  let count = 0;
+  let fetched = 0;
+  const spinner = ora(
+    `Fetching meta data for ${kleur.green(map.size)} albums`
+  ).start();
+  await asyncForEach(Array.from(map.keys()), async key => {
+    const split = key.split('|||');
+    const artist = split[0];
+    const salbum = split[1];
+    const hasMBID = !!map.get(key);
+    if (!hasMBID) {
+      try {
+        const { album } = await getMetaInfo({ artist, album: salbum });
+        const images = album?.image;
+        const url = album?.image?.[images?.length - 1]?.['#text'];
+        let mbid = album?.mbid;
+        if (!mbid) {
+          mbid = await getMBID(key);
+        }
+        map.set(key, JSON.stringify({ mbid, url }));
+        fetched++;
+      } catch (e) {
+        console.log(
+          `\n\tencountered an error while getting meta-info for ${kleur.yellow(
+            artist
+          )} - ${kleur.yellow(salbum)}`
+        );
+      }
+    }
+    count++;
+    if (count % percent === 0) {
+      spinner.color = 'yellow';
+      spinner.text = `Fetching meta data for ${kleur.green(
+        map.size
+      )} albums - ${count / percent}% done`;
+    }
+  });
+  const stop = new Date().getTime();
+  spinner.stop();
+  console.log(
+    `Fetched ${kleur.green(fetched)} new MBID${
+      fetched !== 1 ? 's' : ''
+    } for albums in ${kleur.yellow(timeSpan(stop - start))}`
   );
 };
 
@@ -61,7 +111,7 @@ export const getArtForArtists = async map => {
   let count = 0;
   let fetched = 0;
   const spinner = ora(
-    `Fetching album art for ${kleur.green(map.size)} artists`
+    `Checking cache and resolving URLs for ${kleur.green(map.size)} artists`
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
@@ -94,7 +144,7 @@ export const getArtForArtists = async map => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Fetching album art for ${kleur.green(
+      spinner.text = `Checking cache and resolving URLs for ${kleur.green(
         map.size
       )} artists - ${count / percent}% done`;
     }
@@ -102,13 +152,47 @@ export const getArtForArtists = async map => {
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Fetched ${kleur.green(fetched)} new art in ${kleur.yellow(
-      (stop - start) / 1000
-    )}s`
+    `Checked cache and resolved ${kleur.green(
+      fetched
+    )} new URLs to download in ${kleur.yellow(timeSpan(stop - start))}`
   );
   return { mBIDToUrlMap, artistsWithoutArt };
 };
+export const getArtForAlbums = async map => {
+  const mBIDToUrlMapForAlbums = new Map();
+  const start = new Date().getTime();
+  const percent = Math.ceil(map.size / 100);
+  let count = 0;
+  let fetch = 0;
+  const spinner = ora(
+    `Checking cache for ${kleur.green(map.size)} albums`
+  ).start();
 
+  await asyncForEach(Array.from(map.keys()), async key => {
+    const json = map.get(key);
+    const { mbid, url } = JSON.parse(json);
+    const hasMBID = !!mbid;
+    if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
+      mBIDToUrlMapForAlbums.set(mbid, url);
+      fetch++;
+    }
+    count++;
+    if (count % percent === 0) {
+      spinner.color = 'yellow';
+      spinner.text = `Checking cache for ${kleur.green(map.size)} albums - ${
+        count / percent
+      }% done`;
+    }
+  });
+  const stop = new Date().getTime();
+  spinner.stop();
+  console.log(
+    `Checked cache and needing to download ${kleur.green(
+      fetch
+    )} cache in ${kleur.yellow(timeSpan(stop - start))}`
+  );
+  return mBIDToUrlMapForAlbums;
+};
 const getMetaInfo = async ({ artist, album }) => {
   const searchParams = new URLSearchParams();
   searchParams.set('api_key', LASTFMAPIKEY);
