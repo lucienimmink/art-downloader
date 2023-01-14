@@ -172,7 +172,7 @@ export const getArtForAlbums = async map => {
     const json = map.get(key);
     const { mbid, url } = JSON.parse(json);
     const hasMBID = !!mbid;
-    if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
+    if (hasMBID && url && !(await isAlreadyDownloaded(mbid))) {
       mBIDToUrlMapForAlbums.set(mbid, url);
       fetch++;
     }
@@ -189,7 +189,7 @@ export const getArtForAlbums = async map => {
   console.log(
     `Checked cache and needing to download ${kleur.green(
       fetch
-    )} cache in ${kleur.yellow(timeSpan(stop - start))}`
+    )} albums in ${kleur.yellow(timeSpan(stop - start))}`
   );
   return mBIDToUrlMapForAlbums;
 };

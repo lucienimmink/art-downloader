@@ -52,16 +52,20 @@ readPackage().then(async ({ name, version }) => {
     mergedArtists
   );
   const mBIDToUrlMapForAlbums = await getArtForAlbums(mergedAlbums);
-  console.log(
-    `Going to download ${kleur.green(mBIDToUrlMap.size)} URLs for artists`
-  );
-  await downloadImageForMBIDs(mBIDToUrlMap);
-  console.log(
-    `Going to download ${kleur.green(
-      mBIDToUrlMapForAlbums.size
-    )} URLs for albums`
-  );
-  await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
+  if (mBIDToUrlMap.size !== 0) {
+    console.log(
+      `Going to download ${kleur.green(mBIDToUrlMap.size)} URLs for artists`
+    );
+    await downloadImageForMBIDs(mBIDToUrlMap);
+  }
+  if (mBIDToUrlMapForAlbums.size !== 0) {
+    console.log(
+      `Going to download ${kleur.green(
+        mBIDToUrlMapForAlbums.size
+      )} URLs for albums`
+    );
+    await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
+  }
   if (artistsWithoutArt.size !== 0) {
     console.log(
       `Found ${kleur.red(artistsWithoutArt.size)} artist${
