@@ -16,63 +16,65 @@ import {
   getArtForAlbums,
 } from './modules/fetch.js';
 import { writeMap } from './modules/write.js';
+import timeSpan from './modules/hms.js';
 
-readPackage().then(async ({ name, version }) => {
-  console.log(`Starting ${kleur.green(`${name} v${version}`)}`);
-  const data = await readMusicFile();
-  const artistMap = populateArtistMap(data);
-  const albumMap = populateAlbumMap(data);
-  console.log(
-    `Found ${kleur.green(artistMap.size)} artists and ${kleur.green(
-      albumMap.size
-    )} albums`
-  );
-  let cachedArtistsJSON = '{}';
-  let cachedAlbumsJSON = '{}';
-  try {
-    cachedArtistsJSON = await readArtistJSON();
-    cachedAlbumsJSON = await readAlbumJSON();
-  } catch (e) {}
-  const cachedArtists = new Map(Object.entries(JSON.parse(cachedArtistsJSON)));
-  const cachedAlbums = new Map(Object.entries(JSON.parse(cachedAlbumsJSON)));
-  removeDeletedEntriesFromCacheMap(artistMap, cachedArtists);
-  removeDeletedEntriesFromCacheMap(albumMap, cachedAlbums);
-  console.log(
-    `Found ${kleur.green(cachedArtists.size)} cached artists and ${kleur.green(
-      cachedAlbums.size
-    )} cached albums`
-  );
-  const mergedArtists = new Map([...artistMap, ...cachedArtists]);
-  const mergedAlbums = new Map([...albumMap, ...cachedAlbums]);
-  await getMBIDForArtists(mergedArtists);
-  await getMBIDForAlbums(mergedAlbums);
-  writeMap(mergedArtists, 'artists');
-  writeMap(mergedAlbums, 'albums');
-  const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(
-    mergedArtists
-  );
-  const mBIDToUrlMapForAlbums = await getArtForAlbums(mergedAlbums);
+const skipArtists = !!process.env.npm_config_skipArtists;
+const skipAlbums = !!process.env.npm_config_skipAlbums;
+
+const handleArtists = async data => {
+  console.log(`Handling ${kleur.cyan('Artists')}`);
+  const map = populateArtistMap(data);
+  console.log(`\tFound: ${kleur.green(map.size)}`);
+
+  const cache = await readArtistJSON();
+  const cachedMap = new Map(Object.entries(JSON.parse(cache)));
+  removeDeletedEntriesFromCacheMap(map, cachedMap);
+  console.log(`\tCached: ${kleur.green(cachedMap.size)}`);
+
+  const mergedMap = new Map([...map, ...cachedMap]);
+  await getMBIDForArtists(mergedMap);
+  writeMap(mergedMap, 'artists');
+  const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(mergedMap);
   if (mBIDToUrlMap.size !== 0) {
-    console.log(
-      `Going to download ${kleur.green(mBIDToUrlMap.size)} URLs for artists`
-    );
+    console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
     await downloadImageForMBIDs(mBIDToUrlMap);
   }
-  if (mBIDToUrlMapForAlbums.size !== 0) {
-    console.log(
-      `Going to download ${kleur.green(
-        mBIDToUrlMapForAlbums.size
-      )} URLs for albums`
-    );
-    await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
-  }
   if (artistsWithoutArt.size !== 0) {
-    console.log(
-      `Found ${kleur.red(artistsWithoutArt.size)} artist${
-        artistsWithoutArt.size !== 1 ? 's' : ''
-      } without art`
-    );
+    console.log(`\tWithout art: ${kleur.red(artistsWithoutArt.size)}`);
   }
   await writeMap(artistsWithoutArt, 'artists-without-art');
-  console.log(`${kleur.green(`All is done!`)}`);
+};
+
+const handleAlbums = async data => {
+  console.log(`Handling ${kleur.cyan('Albums')}`);
+  const map = populateAlbumMap(data);
+  console.log(`\tFound: ${kleur.green(map.size)}`);
+
+  const cache = await readAlbumJSON();
+  const cachedMap = new Map(Object.entries(JSON.parse(cache)));
+  removeDeletedEntriesFromCacheMap(map, cachedMap);
+  console.log(`\tCached: ${kleur.green(cachedMap.size)}`);
+
+  const mergedMap = new Map([...map, ...cachedMap]);
+  await getMBIDForAlbums(mergedMap);
+  writeMap(mergedMap, 'albums');
+  const mBIDToUrlMap = await getArtForAlbums(mergedMap);
+  if (mBIDToUrlMap.size !== 0) {
+    console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
+    await downloadImageForMBIDs(mBIDToUrlMap);
+  }
+};
+
+readPackage().then(async ({ name, version }) => {
+  console.log(`Starting ${kleur.green(`${name} v${version}`)}\n`);
+  const start = new Date().getTime();
+  const data = await readMusicFile();
+  if (!skipArtists) {
+    await handleArtists(data);
+  }
+  if (!skipAlbums) {
+    await handleAlbums(data);
+  }
+  const stop = new Date().getTime();
+  console.log(`Finished in ${kleur.yellow(timeSpan(stop - start))}`);
 });

@@ -13,6 +13,7 @@
     "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
     "lint": "npm run lint:prettier",
     "format": "npm run format:prettier",
+    "dev": "node index.js",
     "start": "node index.js",
     "postversion": "git push && git push --tags",
     "prepare": "husky install"

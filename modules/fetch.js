@@ -15,9 +15,7 @@ export const getMBIDForArtists = async map => {
   const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
-  const spinner = ora(
-    `Fetching meta data for ${kleur.green(map.size)} artists`
-  ).start();
+  const spinner = ora(`\tFetching MBIDs: ${kleur.green(map.size)}`).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const hasMBID = !!map.get(key);
     if (!hasMBID) {
@@ -31,7 +29,7 @@ export const getMBIDForArtists = async map => {
         fetched++;
       } catch (e) {
         console.log(
-          `encountered an error while getting meta-info for ${kleur.yellow(
+          `\n\t\tEncountered an error while getting meta-info for ${kleur.yellow(
             key
           )} with MBID ${kleur.yellow(mbid)}`
         );
@@ -40,17 +38,17 @@ export const getMBIDForArtists = async map => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Fetching meta data for ${kleur.green(
-        map.size
-      )} artists - ${count / percent}% done`;
+      spinner.text = `\tFetching MBIDs: ${kleur.green(map.size)} - ${
+        count / percent
+      }% done`;
     }
   });
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Fetched ${kleur.green(fetched)} new MBID${
-      fetched !== 1 ? 's' : ''
-    } for artists in ${kleur.yellow(timeSpan(stop - start))}`
+    `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${kleur.green(
+      fetched
+    )} in ${kleur.yellow(timeSpan(stop - start))}`
   );
 };
 
@@ -59,9 +57,7 @@ export const getMBIDForAlbums = async map => {
   const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
-  const spinner = ora(
-    `Fetching meta data for ${kleur.green(map.size)} albums`
-  ).start();
+  const spinner = ora(`\tFetching MBIDs: ${kleur.green(map.size)}`).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const split = key.split('|||');
     const artist = split[0];
@@ -80,7 +76,7 @@ export const getMBIDForAlbums = async map => {
         fetched++;
       } catch (e) {
         console.log(
-          `\n\tencountered an error while getting meta-info for ${kleur.yellow(
+          `\n\t\tEncountered an error while getting meta-info for ${kleur.yellow(
             artist
           )} - ${kleur.yellow(salbum)}`
         );
@@ -89,17 +85,17 @@ export const getMBIDForAlbums = async map => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Fetching meta data for ${kleur.green(
-        map.size
-      )} albums - ${count / percent}% done`;
+      spinner.text = `\tFetching MBIDs: ${kleur.green(map.size)} - ${
+        count / percent
+      }% done`;
     }
   });
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Fetched ${kleur.green(fetched)} new MBID${
-      fetched !== 1 ? 's' : ''
-    } for albums in ${kleur.yellow(timeSpan(stop - start))}`
+    `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${kleur.green(
+      fetched
+    )} in ${kleur.yellow(timeSpan(stop - start))}`
   );
 };
 
@@ -111,7 +107,7 @@ export const getArtForArtists = async map => {
   let count = 0;
   let fetched = 0;
   const spinner = ora(
-    `Checking cache and resolving URLs for ${kleur.green(map.size)} artists`
+    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
@@ -144,17 +140,18 @@ export const getArtForArtists = async map => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Checking cache and resolving URLs for ${kleur.green(
-        map.size
-      )} artists - ${count / percent}% done`;
+      spinner.text = `\tChecking cache and resolving URLs: ${kleur.yellow(
+        count / percent
+      )}%`;
     }
   });
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Checked cache and resolved ${kleur.green(
-      fetched
-    )} new URLs to download in ${kleur.yellow(timeSpan(stop - start))}`
+    `\tChecking cache and resolving URLs: 
+    \t\tCached: ${kleur.green(count - fetched)} 
+    \t\tNew: ${kleur.green(fetched)}
+    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`
   );
   return { mBIDToUrlMap, artistsWithoutArt };
 };
@@ -165,7 +162,7 @@ export const getArtForAlbums = async map => {
   let count = 0;
   let fetch = 0;
   const spinner = ora(
-    `Checking cache for ${kleur.green(map.size)} albums`
+    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`
   ).start();
 
   await asyncForEach(Array.from(map.keys()), async key => {
@@ -179,17 +176,18 @@ export const getArtForAlbums = async map => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `Checking cache for ${kleur.green(map.size)} albums - ${
+      spinner.text = `\tChecking cache and resolving URLs: ${kleur.yellow(
         count / percent
-      }% done`;
+      )}%`;
     }
   });
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `Checked cache and needing to download ${kleur.green(
-      fetch
-    )} albums in ${kleur.yellow(timeSpan(stop - start))}`
+    `\tChecking cache and resolving URLs: 
+    \t\tCached: ${kleur.green(count - fetch)} 
+    \t\tNew: ${kleur.green(fetch)}
+    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`
   );
   return mBIDToUrlMapForAlbums;
 };
@@ -268,8 +266,8 @@ export const downloadImageForMBIDs = async map => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
     if (url) {
-      sleep(200);
-      console.log(`downloading ${kleur.green(url)} ...`);
+      sleep(100);
+      console.log(`\t\tDownloading: ${kleur.green(url)} ...`);
       const res = await fetch(url);
       writeBlob(key, res);
     }

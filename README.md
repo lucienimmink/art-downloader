@@ -1,6 +1,6 @@
 # Art-downloader
 
-Download artist art based on their [MBID](https://musicbrainz.org/). This node.js program reads a json based music file as used by [JSMusicDB](https://www.jsmusicd.com), which structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist both [fanart](https://fanart.tv/) and [theaudiodb](https://www.theaudiodb.com/) are queried in order to find art for the artist. If a lot of artists need to be queried a rate-limit can occur. If that is the case the program will sleep for 1 minute and then try again. Please be patient while we do our bes to find all the art. 
+Download artist art based on their [MBID](https://musicbrainz.org/). This node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), which structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist both [fanart](https://fanart.tv/) and [theaudiodb](https://www.theaudiodb.com/) are queried to find art for the artist. If a lot of artists need to be queried a rate limit can occur. If that is the case the program will sleep for 1 minute and then try again. Please be patient while we do our best to find all the art.
 
 ## Config
 
@@ -8,8 +8,12 @@ The following variables should be set in `.env`:
 
 - `MUSIC_FILE`: full path to your [JSMusicDB](https://www.jsmusicd.com) compatible [music file](https://github.com/lucienimmink/scanner.py); defaults to `./src`.
 - `ART_FOLDER`: the output folder for the art images; defaults to `./output/art/`.
-- `LASTFMAPIKEY`: your last.fm API key. Used to fetch meta data about the found artist. Mainly used for rapid MBID lookup.
+- `LASTFMAPIKEY`: your last.fm API key. Used to fetch metadata about the found artist. Mainly used for rapid MBID lookup.
 - `FANARTAPIKEY`: your fanart API key. Used for looking up missing art at fanart.
+
+## Options
+
+By default art for both artists and albums is handling. You can skip either by adding the command-line option `--skip[Artists|Albums]=true`. For example: `--skipAlbums=true` will skip all processing for albums.
 
 ## Output
 
@@ -17,5 +21,6 @@ Art is downloaded to `ART_FOLDER` or `./output/art/` if `ART_FOLDER` is not spec
 
 The output logs are stored in `./output` and will contain 2 parts:
 
-- `artists.json` a map of all cached artist <> MBID pairs found. This is used to speed up the process next ti you run the application.
-- `artists-without-art.json` a map of all artists <> MBID for which no art could be found, neither cached or online. You can use the MBID to save your own art for example.
+- `artists.json` a map of all cached artist <> MBID pairs found. This is used to speed up the process the next time you run the application.
+- `albums.json` a map of all cached albums <> `{MBID, URL}` pairs found. Since last.fm has the album art and does the MBID lookup the data is stored in one go.
+- `artists-without-art.json` a map of all artists <> MBID for which no art could be found, neither cached nor online. You can use the MBID to save your art for example.
