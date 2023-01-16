@@ -10,7 +10,7 @@ import timeSpan from './hms.js';
 
 const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
 
-export const getMBIDForArtists = async map => {
+const getMBIDForArtists = async map => {
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
@@ -23,7 +23,7 @@ export const getMBIDForArtists = async map => {
         const { artist } = await getMetaInfo({ artist: key });
         let mbid = artist?.mbid;
         if (!mbid) {
-          mbid = await getMBID(key);
+          mbid = await getArtistMBID(key);
         }
         map.set(key, mbid);
         fetched++;
@@ -52,7 +52,7 @@ export const getMBIDForArtists = async map => {
   );
 };
 
-export const getMBIDForAlbums = async map => {
+const getMBIDForAlbums = async map => {
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
@@ -69,9 +69,6 @@ export const getMBIDForAlbums = async map => {
         const images = album?.image;
         const url = album?.image?.[images?.length - 1]?.['#text'];
         let mbid = album?.mbid;
-        if (!mbid) {
-          mbid = await getMBID(key);
-        }
         map.set(key, JSON.stringify({ mbid, url }));
         fetched++;
       } catch (e) {
@@ -97,6 +94,19 @@ export const getMBIDForAlbums = async map => {
       fetched
     )} in ${kleur.yellow(timeSpan(stop - start))}`
   );
+};
+
+export const getMBID = async (map, type) => {
+  switch (type) {
+    case 'artists':
+      await getMBIDForArtists(map);
+      break;
+    case 'albums':
+      await getMBIDForAlbums(map);
+      break;
+    default:
+      console.log(`\tCannot handle type ${kleur.red(type)}`);
+  }
 };
 
 export const getArtForArtists = async map => {
@@ -210,7 +220,7 @@ const getMetaInfo = async ({ artist, album }) => {
   return json;
 };
 
-const getMBID = async artist => {
+const getArtistMBID = async artist => {
   await sleep(1000); // https://wiki.musicbrainz.org/MusicBrainz_API/Rate_Limiting
   const searchParams = new URLSearchParams();
   searchParams.set('fmt', 'json');

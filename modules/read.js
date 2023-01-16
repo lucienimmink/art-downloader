@@ -14,6 +14,16 @@ export const readArtistJSON = async () => {
 export const readAlbumJSON = async () => {
   return await fs.readFile(`output/albums.json`, 'utf8');
 };
+export const readJSON = async type => {
+  switch (type) {
+    case 'artists':
+      return await readArtistJSON();
+    case 'albums':
+      return await readAlbumJSON();
+    default:
+      console.log(`\tCannot handle type ${kleur.red(type)}`);
+  }
+};
 
 export const populateArtistMap = data => {
   const map = new Map();
@@ -35,6 +45,17 @@ export const populateAlbumMap = data => {
     map.delete(null);
   }
   return map;
+};
+
+export const populateMap = (data, type) => {
+  switch (type) {
+    case 'artists':
+      return populateArtistMap(data);
+    case 'albums':
+      return populateAlbumMap(data);
+    default:
+      console.log(`\tCannot handle type ${kleur.red(type)}`);
+  }
 };
 
 export const removeDeletedEntriesFromCacheMap = (map, cache) => {

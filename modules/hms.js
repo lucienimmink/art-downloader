@@ -10,7 +10,6 @@ function getDays(days) {
 }
 
 export default function timeSpan(mseconds, humanize = false) {
-  if (!mseconds) return '';
   const seconds = mseconds / 1000;
   const days = Math.floor(seconds / 3600 / 24);
   const hours = Math.floor((seconds / 3600) % 24);
