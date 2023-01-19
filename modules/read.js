@@ -7,21 +7,11 @@ const { MUSIC_FILE } = process.env;
 export const readMusicFile = async () => {
   return await fs.readFile(MUSIC_FILE || `src/node-music.json`, 'utf8');
 };
-
-export const readArtistJSON = async () => {
-  return await fs.readFile(`output/artists.json`, 'utf8');
-};
-export const readAlbumJSON = async () => {
-  return await fs.readFile(`output/albums.json`, 'utf8');
-};
 export const readJSON = async type => {
-  switch (type) {
-    case 'artists':
-      return await readArtistJSON();
-    case 'albums':
-      return await readAlbumJSON();
-    default:
-      console.log(`\tCannot handle type ${kleur.red(type)}`);
+  try {
+    return await fs.readFile(`output/${type}.json`, 'utf8');
+  } catch (error) {
+    return '{}';
   }
 };
 

@@ -56,7 +56,7 @@ const handleAlbums = async data => {
   const map = await readData(data, 'albums');
   await getMBID(map, 'albums');
   writeMap(map, 'albums');
-  const mBIDToUrlMap = await getArtForAlbums(mergedMap);
+  const mBIDToUrlMap = await getArtForAlbums(map);
   if (mBIDToUrlMap.size !== 0) {
     console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
     await downloadImageForMBIDs(mBIDToUrlMap);
