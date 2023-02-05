@@ -64,7 +64,9 @@ const handleAlbums = async data => {
 };
 
 export const handle = async (data, type) => {
-  console.log(`Handling ${kleur.cyan(type)}`);
+  console.log(
+    `Handling ${kleur.cyan(type.replace(/^\w/, c => c.toUpperCase()))}`
+  );
   switch (type) {
     case 'artists':
       await handleArtists(data);
