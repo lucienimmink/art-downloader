@@ -108,4 +108,6 @@ dist
 src
 
 # output
-output
+output/artists.json
+output/albums.json
+output/artists-without-art.json
