@@ -1,6 +1,9 @@
 import Table from 'cli-table';
 import kleur from 'kleur';
 import dotenv from 'dotenv';
+
+import { sortAlbums, sortArtists } from './helpers.js';
+
 dotenv.config();
 
 const texts = {
@@ -27,23 +30,31 @@ export const printTable = (list, type) => {
     kleur.yellow(texts[type].title + ' (' + Object.keys(list).length + ')'),
   );
   if (type === 'artists-without-art' || type === 'artists') {
-    const table = new Table({
-      head: ['Artist', 'MBID'],
-    });
-    for (const artist of Object.keys(list)) {
-      table.push([artist, list[artist]]);
-    }
-    console.log(table.toString());
+    printArtistTable(list);
   } else if (type === 'albums') {
-    const table = new Table({
-      head: ['Artist', 'Album'],
-      colWidths: [30, 30, 84],
-    });
-    for (const album of Object.keys(list)) {
-      const [artist, albumName] = album.split('|||');
-      const { url, mbid } = JSON.parse(list[album]);
-      table.push([artist, albumName, url || mbid || 'unknown']);
-    }
-    console.log(table.toString());
+    printAlbumTable(list);
   }
+};
+
+const printArtistTable = list => {
+  const table = new Table({
+    head: ['Artist', 'MBID'],
+  });
+  for (const artist of Object.keys(list).sort(sortArtists)) {
+    table.push([artist, list[artist]]);
+  }
+  console.log(table.toString());
+};
+
+const printAlbumTable = list => {
+  const table = new Table({
+    head: ['Artist', 'Album', 'Art URL'],
+    colWidths: [30, 30, 84],
+  });
+  for (const album of Object.keys(list).sort(sortAlbums)) {
+    const [artist, albumName] = album.split('|||');
+    const { url, mbid } = JSON.parse(list[album]);
+    table.push([artist, albumName, url || mbid || 'unknown']);
+  }
+  console.log(table.toString());
 };

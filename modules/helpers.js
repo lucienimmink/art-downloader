@@ -78,3 +78,20 @@ export const handle = async (data, type) => {
       console.log(`\tCannot handle type ${kleur.red(type)}`);
   }
 };
+
+const sorter = (aArtist, bArtist) => {
+  if (aArtist < bArtist) return -1;
+  if (aArtist > bArtist) return 1;
+  return 0;
+};
+
+export const sortArtists = (a, b) => {
+  const aArtist = a?.toLowerCase();
+  const bArtist = b?.toLowerCase();
+  return sorter(aArtist, bArtist);
+};
+export const sortAlbums = (a, b) => {
+  const aArtist = a.split('|||')[0]?.toLowerCase();
+  const bArtist = b.split('|||')[0]?.toLowerCase();
+  return sorter(aArtist, bArtist);
+};
