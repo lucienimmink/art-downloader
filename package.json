@@ -1,6 +1,6 @@
 {
   "name": "@addasoft/art-downloader",
-  "version": "1.4.1",
+  "version": "1.5.0",
   "description": "download artist and album art based on the MBID",
   "main": "index.js",
   "files": [
