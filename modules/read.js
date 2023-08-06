@@ -8,8 +8,8 @@ export const readMusicFile = async () => {
   return await fs.readFile(MUSIC_FILE || `src/node-music.json`, 'utf8');
 };
 
-export const readArtistsWithoutArtFile = async () => {
-  return await fs.readFile(`output/artists-without-art.json`, 'utf8');
+export const readOutputfile = async type => {
+  return await fs.readFile(`output/${type}.json`, 'utf8');
 };
 
 export const readJSON = async type => {

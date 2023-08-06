@@ -13,8 +13,13 @@ The following variables should be set in `.env`:
 
 ## Options
 
-By default art for both artists and albums is handled. You can skip either by adding the command-line option `--skip[Artists|Albums]=true`. For example: `--skipAlbums=true` will skip all processing for albums.
-The option `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
+- `--skipArtists` will skip all processing for artists.
+- `--skipAlbums` will skip all processing for albums.
+- `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
+- `--printArtists` will print a list of all artists and their MBID.
+- `--printAlbums` will print a lit of all albums and the URL to the source of the art
+
+> Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
 
 ## Output
 
