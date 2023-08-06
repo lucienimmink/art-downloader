@@ -20,7 +20,7 @@ export const writeBlob = async (key, res) => {
 export const isAlreadyDownloaded = async mbid => {
   const alreadyDownloadedFiles = await fs.readdir(art_folder);
   const match = alreadyDownloadedFiles.find(elemement =>
-    elemement.includes(mbid)
+    elemement.includes(mbid),
   );
   return !!match;
 };

@@ -13,7 +13,8 @@ The following variables should be set in `.env`:
 
 ## Options
 
-By default art for both artists and albums is handling. You can skip either by adding the command-line option `--skip[Artists|Albums]=true`. For example: `--skipAlbums=true` will skip all processing for albums.
+By default art for both artists and albums is handled. You can skip either by adding the command-line option `--skip[Artists|Albums]=true`. For example: `--skipAlbums=true` will skip all processing for albums.
+The option `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
 
 ## Output
 

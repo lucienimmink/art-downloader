@@ -30,8 +30,8 @@ const getMBIDForArtists = async map => {
       } catch (e) {
         console.log(
           `\n\t\tEncountered an error while getting meta-info for ${kleur.yellow(
-            key
-          )} with MBID ${kleur.yellow(mbid)}`
+            key,
+          )} with MBID ${kleur.yellow(mbid)}`,
         );
       }
     }
@@ -47,8 +47,8 @@ const getMBIDForArtists = async map => {
   spinner.stop();
   console.log(
     `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${kleur.green(
-      fetched
-    )} in ${kleur.yellow(timeSpan(stop - start))}`
+      fetched,
+    )} in ${kleur.yellow(timeSpan(stop - start))}`,
   );
 };
 
@@ -74,8 +74,8 @@ const getMBIDForAlbums = async map => {
       } catch (e) {
         console.log(
           `\n\t\tEncountered an error while getting meta-info for ${kleur.yellow(
-            artist
-          )} - ${kleur.yellow(salbum)}`
+            artist,
+          )} - ${kleur.yellow(salbum)}`,
         );
       }
     }
@@ -91,8 +91,8 @@ const getMBIDForAlbums = async map => {
   spinner.stop();
   console.log(
     `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${kleur.green(
-      fetched
-    )} in ${kleur.yellow(timeSpan(stop - start))}`
+      fetched,
+    )} in ${kleur.yellow(timeSpan(stop - start))}`,
   );
 };
 
@@ -117,7 +117,7 @@ export const getArtForArtists = async map => {
   let count = 0;
   let fetched = 0;
   const spinner = ora(
-    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`
+    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`,
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
@@ -151,7 +151,7 @@ export const getArtForArtists = async map => {
     if (count % percent === 0) {
       spinner.color = 'yellow';
       spinner.text = `\tChecking cache and resolving URLs: ${kleur.yellow(
-        count / percent
+        count / percent,
       )}%`;
     }
   });
@@ -161,7 +161,7 @@ export const getArtForArtists = async map => {
     `\tChecking cache and resolving URLs: 
     \t\tCached: ${kleur.green(count - fetched)} 
     \t\tNew: ${kleur.green(fetched)}
-    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`
+    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
   );
   return { mBIDToUrlMap, artistsWithoutArt };
 };
@@ -172,7 +172,7 @@ export const getArtForAlbums = async map => {
   let count = 0;
   let fetch = 0;
   const spinner = ora(
-    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`
+    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`,
   ).start();
 
   await asyncForEach(Array.from(map.keys()), async key => {
@@ -187,7 +187,7 @@ export const getArtForAlbums = async map => {
     if (count % percent === 0) {
       spinner.color = 'yellow';
       spinner.text = `\tChecking cache and resolving URLs: ${kleur.yellow(
-        count / percent
+        count / percent,
       )}%`;
     }
   });
@@ -197,7 +197,7 @@ export const getArtForAlbums = async map => {
     `\tChecking cache and resolving URLs: 
     \t\tCached: ${kleur.green(count - fetch)} 
     \t\tNew: ${kleur.green(fetch)}
-    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`
+    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
   );
   return mBIDToUrlMapForAlbums;
 };
@@ -214,7 +214,7 @@ const getMetaInfo = async ({ artist, album }) => {
     searchParams.set('method', 'artist.getinfo');
   }
   const response = await fetch(
-    `https://ws.audioscrobbler.com/2.0/?${searchParams}`
+    `https://ws.audioscrobbler.com/2.0/?${searchParams}`,
   );
   const json = await response.json();
   return json;
@@ -226,7 +226,7 @@ const getArtistMBID = async artist => {
   searchParams.set('fmt', 'json');
   searchParams.set('query', artist);
   const response = await fetch(
-    `https://musicbrainz.org/ws/2/artist/?${searchParams}`
+    `https://musicbrainz.org/ws/2/artist/?${searchParams}`,
   );
   const { artists } = await response.json();
   return artists[0].id;
@@ -235,7 +235,7 @@ const getArtistMBID = async artist => {
 export const getFanArt = async mbid => {
   await sleep(200); // rate-limit :(
   const response = await fetch(
-    `https://webservice.fanart.tv/v3/music/${mbid}&?api_key=${FANARTAPIKEY}&format=json`
+    `https://webservice.fanart.tv/v3/music/${mbid}&?api_key=${FANARTAPIKEY}&format=json`,
   );
   if (response.status === 200) {
     const json = await response.json();
@@ -251,8 +251,8 @@ export const getAudioDB = async artist => {
   await sleep(1500);
   const response = await fetch(
     `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(
-      artist
-    )}`
+      artist,
+    )}`,
   );
   if (response.status === 200) {
     const json = await response.json();
