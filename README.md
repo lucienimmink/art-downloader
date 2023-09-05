@@ -1,6 +1,6 @@
 # Art-downloader
 
-Download artist art based on their [MBID](https://musicbrainz.org/). This node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), which structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist both [fanart](https://fanart.tv/) and [theaudiodb](https://www.theaudiodb.com/) are queried to find art for the artist. If a lot of artists need to be queried a rate limit can occur. If that is the case the program will sleep for 1 minute and then try again. Please be patient while we do our best to find all the art.
+Download artist art based on their [MBID](https://musicbrainz.org/). This node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), whose structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist both [fanart](https://fanart.tv/) and [theaudiodb](https://www.theaudiodb.com/) are queried to find art for the artist. If a lot of artists need to be queried a rate limit can occur. If that is the case the program will sleep for 1 minute and then try again. Please be patient while we do our best to find all the art.
 
 ## Config
 
@@ -17,7 +17,7 @@ The following variables should be set in `.env`:
 - `--skipAlbums` will skip all processing for albums.
 - `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
 - `--printArtists` will print a list of all artists and their MBID.
-- `--printAlbums` will print a lit of all albums and the URL to the source of the art
+- `--printAlbums` will print a list of all albums and the URL to the source of the art
 
 > Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
 
