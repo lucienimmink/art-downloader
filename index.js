@@ -44,6 +44,7 @@ readPackage().then(async ({ name, version }) => {
   if (!skipAlbums) {
     await handle(data, 'albums');
   }
+  await handle(data, 'update');
   const stop = new Date().getTime();
   console.log(`Finished in ${kleur.yellow(timeSpan(stop - start))}`);
 });
