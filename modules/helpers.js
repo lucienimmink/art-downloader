@@ -10,7 +10,7 @@ import {
   downloadImageForMBIDs,
   getArtForAlbums,
 } from './fetch.js';
-import { writeMap } from './write.js';
+import { writeMap, updateData } from './write.js';
 
 export const asyncForEach = async (array, callback) => {
   for (let index = 0; index < array.length; index++) {
@@ -27,13 +27,13 @@ const cleanCacheMap = (map, cache) => {
   removeDeletedEntriesFromCacheMap(map, cachedMap);
   return cachedMap;
 };
-const readData = async (data, type) => {
+const readData = async (data, type, print = true) => {
   const map = populateMap(data, type);
-  console.log(`\tFound: ${kleur.green(map.size)}`);
+  if (print) console.log(`\tFound: ${kleur.green(map.size)}`);
 
   const cache = await readJSON(type);
   const cachedMap = cleanCacheMap(map, cache);
-  console.log(`\tCached: ${kleur.green(cachedMap.size)}`);
+  if (print) console.log(`\tCached: ${kleur.green(cachedMap.size)}`);
 
   return new Map([...map, ...cachedMap]);
 };
@@ -63,6 +63,14 @@ const handleAlbums = async data => {
   }
 };
 
+const handleUpdate = async (data, artists, albums) => {
+  try {
+    return updateData(data, artists, albums);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const handle = async (data, type) => {
   console.log(
     `Handling ${kleur.cyan(type.replace(/^\w/, c => c.toUpperCase()))}`,
@@ -73,6 +81,11 @@ export const handle = async (data, type) => {
       break;
     case 'albums':
       await handleAlbums(data);
+      break;
+    case 'update':
+      const artists = await readData(data, 'artists', false);
+      const albums = await readData(data, 'albums', false);
+      await handleUpdate(JSON.parse(data), artists, albums);
       break;
     default:
       console.log(`\tCannot handle type ${kleur.red(type)}`);

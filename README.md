@@ -18,6 +18,7 @@ The following variables should be set in `.env`:
 - `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
 - `--printArtists` will print a list of all artists and their MBID.
 - `--printAlbums` will print a list of all albums and the URL to the source of the art
+- `--updateLib` will extend the source `MUSIC_FILE` with the MBIDs
 
 > Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
 

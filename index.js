@@ -10,6 +10,7 @@ const skipAlbums = !!process.env.npm_config_skipAlbums;
 const printArtistsWithoutArt = !!process.env.npm_config_printArtistsWithoutArt;
 const printArtists = !!process.env.npm_config_printArtists;
 const printAlbums = !!process.env.npm_config_printAlbums;
+const updateLib = !!process.env.npm_config_updateLib;
 
 readPackage().then(async ({ name, version }) => {
   console.log(`Starting ${kleur.green(`${name} v${version}`)}\n`);
@@ -29,6 +30,12 @@ readPackage().then(async ({ name, version }) => {
     printTable(list, printtype);
     process.exit(0);
   }
+  if (updateLib) {
+    const data = await readMusicFile();
+    await handle(data, 'update');
+    process.exit(0);
+  }
+
   const start = new Date().getTime();
   const data = await readMusicFile();
   if (!skipArtists) {
