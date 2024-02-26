@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
+import kleur from 'kleur';
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -25,11 +26,6 @@ export const isAlreadyDownloaded = async mbid => {
   return !!match;
 };
 
-function sleep(ms) {
-  console.log(`going to sleep for ${ms}ms...`);
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
-
 export const updateData = async (obj, artists, albums) => {
   obj.forEach(entry => {
     const key = `${entry.artist}|||${entry.album}`;
@@ -42,4 +38,18 @@ export const updateData = async (obj, artists, albums) => {
   });
   const json = JSON.stringify(obj);
   return await fs.writeFile(MUSIC_FILE || `src/node-music.json`, json);
+};
+
+export const updateWriteSource = async paths => {
+  console.log(`\tUpdating ${kleur.green(paths.size)} source folders`);
+  paths.forEach(async (path, mbid) => {
+    try {
+      const meta = fsSync.statSync(path);
+      if (meta.isDirectory()) {
+        await fs.copyFile(`${art_folder}/${mbid}.jpg`, `${path}/cover.jpg`);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  });
 };

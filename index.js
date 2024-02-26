@@ -11,6 +11,7 @@ const printArtistsWithoutArt = !!process.env.npm_config_printArtistsWithoutArt;
 const printArtists = !!process.env.npm_config_printArtists;
 const printAlbums = !!process.env.npm_config_printAlbums;
 const updateLib = !!process.env.npm_config_updateLib;
+const writeSource = !!process.env.npm_config_writeSource;
 
 readPackage().then(async ({ name, version }) => {
   console.log(`Starting ${kleur.green(`${name} v${version}`)}\n`);
@@ -33,6 +34,11 @@ readPackage().then(async ({ name, version }) => {
   if (updateLib) {
     const data = await readMusicFile();
     await handle(data, 'update');
+    process.exit(0);
+  }
+  if (writeSource) {
+    const data = await readMusicFile();
+    await handle(data, 'writeSource');
     process.exit(0);
   }
 

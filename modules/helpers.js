@@ -10,7 +10,7 @@ import {
   downloadImageForMBIDs,
   getArtForAlbums,
 } from './fetch.js';
-import { writeMap, updateData } from './write.js';
+import { writeMap, updateData, updateWriteSource } from './write.js';
 
 export const asyncForEach = async (array, callback) => {
   for (let index = 0; index < array.length; index++) {
@@ -71,6 +71,14 @@ const handleUpdate = async (data, artists, albums) => {
   }
 };
 
+const handleWriteSource = async paths => {
+  try {
+    return updateWriteSource(paths);
+  } catch (e) {
+    console.error(e);
+  }
+};
+
 export const handle = async (data, type) => {
   console.log(
     `Handling ${kleur.cyan(type.replace(/^\w/, c => c.toUpperCase()))}`,
@@ -86,6 +94,10 @@ export const handle = async (data, type) => {
       const artists = await readData(data, 'artists', false);
       const albums = await readData(data, 'albums', false);
       await handleUpdate(JSON.parse(data), artists, albums);
+      break;
+    case 'writeSource':
+      const paths = await readData(data, 'path', false);
+      await handleWriteSource(paths);
       break;
     default:
       console.log(`\tCannot handle type ${kleur.red(type)}`);

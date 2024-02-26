@@ -10,6 +10,7 @@ The following variables should be set in `.env`:
 - `ART_FOLDER`: the output folder for the art images; defaults to `./output/art/`.
 - `LASTFMAPIKEY`: your last.fm API key. Used to fetch metadata about the found artist. Mainly used for rapid MBID lookup.
 - `FANARTAPIKEY`: your fanart API key. Used for looking up missing art at fanart.
+- `SOURCE_BASE`: _optional_ the base folder to which the paths in `MUSIC_FILE` resolve. Used when trying to write art to the source folders.
 
 ## Options
 
@@ -19,6 +20,7 @@ The following variables should be set in `.env`:
 - `--printArtists` will print a list of all artists and their MBID.
 - `--printAlbums` will print a list of all albums and the URL to the source of the art
 - `--updateLib` will extend the source `MUSIC_FILE` with the MBIDs
+- `--writeSource` will write `cover.jpg` files in the folder per album found in `SOURCE_BASE`
 
 > Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
 
