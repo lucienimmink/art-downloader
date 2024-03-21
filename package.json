@@ -15,7 +15,7 @@
     "format": "npm run format:prettier",
     "dev": "node index.js",
     "start": "node index.js",
-    "postversion": "git push && git push --tags",
+    "postversion": "git push --follow-tags",
     "prepare": "husky install"
   },
   "repository": {
