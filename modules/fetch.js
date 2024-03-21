@@ -10,11 +10,12 @@ import timeSpan from './hms.js';
 
 const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
 
-const getMBIDForArtists = async map => {
+const getMBIDForArtists = async (map, isTurbo = false) => {
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
+  const newMBIDs = new Map();
   const spinner = ora(`\tFetching MBIDs: ${kleur.green(map.size)}`).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const hasMBID = !!map.get(key);
@@ -26,6 +27,7 @@ const getMBIDForArtists = async map => {
           mbid = await getArtistMBID(key);
         }
         map.set(key, mbid);
+        newMBIDs.set(key, mbid);
         fetched++;
       } catch (e) {
         console.log(
@@ -50,13 +52,15 @@ const getMBIDForArtists = async map => {
       fetched,
     )} in ${kleur.yellow(timeSpan(stop - start))}`,
   );
+  return newMBIDs;
 };
 
-const getMBIDForAlbums = async map => {
+const getMBIDForAlbums = async (map, isTurbo = false) => {
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
   let fetched = 0;
+  const newMBIDs = new Map();
   const spinner = ora(`\tFetching MBIDs: ${kleur.green(map.size)}`).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const split = key.split('|||');
@@ -70,6 +74,7 @@ const getMBIDForAlbums = async map => {
         const url = album?.image?.[images?.length - 1]?.['#text'];
         let mbid = album?.mbid;
         map.set(key, JSON.stringify({ mbid, url }));
+        newMBIDs.set(key, JSON.stringify({ mbid, url }));
         fetched++;
       } catch (e) {
         console.log(
@@ -94,22 +99,22 @@ const getMBIDForAlbums = async map => {
       fetched,
     )} in ${kleur.yellow(timeSpan(stop - start))}`,
   );
+  return newMBIDs;
 };
 
-export const getMBID = async (map, type) => {
+export const getMBID = async (map, type, isTurbo = false) => {
   switch (type) {
     case 'artists':
-      await getMBIDForArtists(map);
-      break;
+      return await getMBIDForArtists(map, isTurbo);
     case 'albums':
-      await getMBIDForAlbums(map);
-      break;
+      return await getMBIDForAlbums(map, isTurbo);
     default:
       console.log(`\tCannot handle type ${kleur.red(type)}`);
+      return new Map();
   }
 };
 
-export const getArtForArtists = async map => {
+export const getArtForArtists = async (map, isTurbo = false) => {
   const mBIDToUrlMap = new Map();
   const artistsWithoutArt = new Map();
   const start = new Date().getTime();
@@ -157,15 +162,23 @@ export const getArtForArtists = async map => {
   });
   const stop = new Date().getTime();
   spinner.stop();
-  console.log(
-    `\tChecking cache and resolving URLs: 
-    \t\tCached: ${kleur.green(count - fetched)} 
-    \t\tNew: ${kleur.green(fetched)}
-    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
-  );
+  if (!isTurbo) {
+    console.log(
+      `\tChecking cache and resolving URLs: 
+      \t\tCached: ${kleur.green(count - fetched)} 
+      \t\tNew: ${kleur.green(fetched)}
+      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+    );
+  } else {
+    console.log(
+      `\tResolving URLs: 
+      \t\tNew: ${kleur.green(fetched)}
+      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+    );
+  }
   return { mBIDToUrlMap, artistsWithoutArt };
 };
-export const getArtForAlbums = async map => {
+export const getArtForAlbums = async (map, isTurbo = false) => {
   const mBIDToUrlMapForAlbums = new Map();
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
@@ -193,12 +206,20 @@ export const getArtForAlbums = async map => {
   });
   const stop = new Date().getTime();
   spinner.stop();
-  console.log(
-    `\tChecking cache and resolving URLs: 
-    \t\tCached: ${kleur.green(count - fetch)} 
-    \t\tNew: ${kleur.green(fetch)}
-    \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
-  );
+  if (!isTurbo) {
+    console.log(
+      `\tChecking cache and resolving URLs: 
+      \t\tCached: ${kleur.green(count - fetch)} 
+      \t\tNew: ${kleur.green(fetch)}
+      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+    );
+  } else {
+    console.log(
+      `\tResolving URLs: 
+      \t\tNew: ${kleur.green(fetch)}
+      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+    );
+  }
   return mBIDToUrlMapForAlbums;
 };
 const getMetaInfo = async ({ artist, album }) => {

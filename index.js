@@ -12,6 +12,7 @@ const printArtists = !!process.env.npm_config_printArtists;
 const printAlbums = !!process.env.npm_config_printAlbums;
 const updateLib = !!process.env.npm_config_updateLib;
 const writeSource = !!process.env.npm_config_writeSource;
+const isTurbo = !!process.env.npm_config_turbo;
 
 readPackage().then(async ({ name, version }) => {
   console.log(`Starting ${kleur.green(`${name} v${version}`)}\n`);
@@ -45,10 +46,10 @@ readPackage().then(async ({ name, version }) => {
   const start = new Date().getTime();
   const data = await readMusicFile();
   if (!skipArtists) {
-    await handle(data, 'artists');
+    await handle(data, 'artists', isTurbo);
   }
   if (!skipAlbums) {
-    await handle(data, 'albums');
+    await handle(data, 'albums', isTurbo);
   }
   await handle(data, 'update');
   await handle(data, 'writeSource');

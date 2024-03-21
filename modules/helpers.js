@@ -37,11 +37,14 @@ const readData = async (data, type, print = true) => {
 
   return new Map([...map, ...cachedMap]);
 };
-const handleArtists = async data => {
+const handleArtists = async (data, isTurbo = false) => {
   const map = await readData(data, 'artists');
-  await getMBID(map, 'artists');
+  const newMBIDs = await getMBID(map, 'artists', isTurbo);
   writeMap(map, 'artists');
-  const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(map);
+  const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(
+    isTurbo ? newMBIDs : map,
+    isTurbo,
+  );
   if (mBIDToUrlMap.size !== 0) {
     console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
     await downloadImageForMBIDs(mBIDToUrlMap);
@@ -52,11 +55,11 @@ const handleArtists = async data => {
   await writeMap(artistsWithoutArt, 'artists-without-art');
 };
 
-const handleAlbums = async data => {
-  const map = await readData(data, 'albums');
-  await getMBID(map, 'albums');
+const handleAlbums = async (data, isTurbo = false) => {
+  const map = await readData(data, 'albums', isTurbo);
+  const newMBIDs = await getMBID(map, 'albums');
   writeMap(map, 'albums');
-  const mBIDToUrlMap = await getArtForAlbums(map);
+  const mBIDToUrlMap = await getArtForAlbums(isTurbo ? newMBIDs : map, isTurbo);
   if (mBIDToUrlMap.size !== 0) {
     console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
     await downloadImageForMBIDs(mBIDToUrlMap);
@@ -79,16 +82,16 @@ const handleWriteSource = async paths => {
   }
 };
 
-export const handle = async (data, type) => {
+export const handle = async (data, type, isTurbo = false) => {
   console.log(
-    `Handling ${kleur.cyan(type.replace(/^\w/, c => c.toUpperCase()))}`,
+    `Handling ${kleur.cyan(type.replace(/^\w/, c => c.toUpperCase()))} ${isTurbo ? `in ${kleur.green('turbo')} mode` : ``}`,
   );
   switch (type) {
     case 'artists':
-      await handleArtists(data);
+      await handleArtists(data, isTurbo);
       break;
     case 'albums':
-      await handleAlbums(data);
+      await handleAlbums(data, isTurbo);
       break;
     case 'update':
       const artists = await readData(data, 'artists', false);

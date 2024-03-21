@@ -16,6 +16,7 @@ The following variables should be set in `.env`:
 
 - `--skipArtists` will skip all processing for artists.
 - `--skipAlbums` will skip all processing for albums.
+- `--turbo` only download art for newly fetched MBIDs.
 - `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
 - `--printArtists` will print a list of all artists and their MBID.
 - `--printAlbums` will print a list of all albums and the URL to the source of the art
