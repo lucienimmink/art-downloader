@@ -1,9 +1,6 @@
 import fetch from 'node-fetch';
 import ora from 'ora';
 import kleur from 'kleur';
-import dotenv from 'dotenv';
-dotenv.config();
-
 import { asyncForEach, sleep } from './helpers.js';
 import { writeBlob, isAlreadyDownloaded } from './write.js';
 import timeSpan from './hms.js';

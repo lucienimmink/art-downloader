@@ -1,7 +1,5 @@
 import * as fs from 'fs/promises';
-import dotenv from 'dotenv';
 import kleur from 'kleur';
-dotenv.config();
 
 const { MUSIC_FILE, SOURCE_BASE } = process.env;
 

@@ -1,8 +1,6 @@
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
 import kleur from 'kleur';
-import dotenv from 'dotenv';
-dotenv.config();
 
 const { ART_FOLDER, MUSIC_FILE } = process.env;
 

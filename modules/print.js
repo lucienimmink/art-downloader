@@ -1,10 +1,6 @@
 import Table from 'cli-table';
 import kleur from 'kleur';
-import dotenv from 'dotenv';
-
 import { sortAlbums, sortArtists } from './helpers.js';
-
-dotenv.config();
 
 const texts = {
   'artists-without-art': {

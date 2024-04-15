@@ -13,8 +13,8 @@
     "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
     "lint": "npm run lint:prettier",
     "format": "npm run format:prettier",
-    "dev": "node index.js",
-    "start": "node index.js",
+    "dev": "node --env-file=.env index.js",
+    "start": "node --env-file=.env index.js",
     "postversion": "git push --follow-tags",
     "prepare": "husky install"
   },
@@ -30,7 +30,6 @@
   "homepage": "https://github.com/lucienimmink/art-downloader#readme",
   "dependencies": {
     "cli-table": "^0.3.11",
-    "dotenv": "^16.0.0",
     "kleur": "^4.1.4",
     "node-fetch": "^3.1.0",
     "ora": "^8.0.0",
