@@ -30,6 +30,7 @@
   "homepage": "https://github.com/lucienimmink/art-downloader#readme",
   "dependencies": {
     "cli-table": "^0.3.11",
+    "file-type": "^19.0.0",
     "kleur": "^4.1.4",
     "node-fetch": "^3.1.0",
     "ora": "^8.0.0",

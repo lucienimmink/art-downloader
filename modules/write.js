@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
+import { fileTypeFromStream } from 'file-type';
 import kleur from 'kleur';
 
 const { ART_FOLDER, MUSIC_FILE } = process.env;
@@ -13,7 +14,10 @@ export const writeMap = async (map, name = 'artists') => {
 };
 
 export const writeBlob = async (key, res) => {
-  res.body.pipe(fsSync.createWriteStream(`${art_folder}/${key}.jpg`));
+  const fileType = await fileTypeFromStream(res.body);
+  res.body.pipe(
+    fsSync.createWriteStream(`${art_folder}/${key}.${fileType.ext}`),
+  );
 };
 
 export const isAlreadyDownloaded = async mbid => {
