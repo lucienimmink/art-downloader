@@ -17,7 +17,7 @@ const texts = {
   },
 };
 
-export const printTable = (list, type) => {
+export const printTable = (list, type, filter = '') => {
   if (Object.keys(list).length === 0) {
     console.log(kleur.green(texts[type].empty));
     return;
@@ -26,13 +26,13 @@ export const printTable = (list, type) => {
     kleur.yellow(texts[type].title + ' (' + Object.keys(list).length + ')'),
   );
   if (type === 'artists-without-art' || type === 'artists') {
-    printArtistTable(list);
+    printArtistTable(list, filter);
   } else if (type === 'albums') {
-    printAlbumTable(list);
+    printAlbumTable(list, filter);
   }
 };
 
-const printArtistTable = list => {
+const printArtistTable = (list, filter) => {
   const table = new Table({
     head: ['Artist', 'MBID'],
   });
@@ -42,9 +42,9 @@ const printArtistTable = list => {
   console.log(table.toString());
 };
 
-const printAlbumTable = list => {
+const printAlbumTable = (list, filter) => {
   const table = new Table({
-    head: ['Artist', 'Album', 'Art URL'],
+    head: ['Artist', 'Album', filter === 'unknown' ? 'MBID' : 'Art URL'],
     colWidths: [30, 30, 84],
   });
   for (const album of Object.keys(list).sort(sortAlbums)) {

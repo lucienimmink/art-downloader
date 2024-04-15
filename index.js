@@ -9,6 +9,7 @@ const skipArtists = !!process.env.npm_config_skipArtists;
 const skipAlbums = !!process.env.npm_config_skipAlbums;
 const printArtistsWithoutArt = !!process.env.npm_config_printArtistsWithoutArt;
 const printArtists = !!process.env.npm_config_printArtists;
+const printAlbumsWithoutArt = !!process.env.npm_config_printAlbumsWithoutArt;
 const printAlbums = !!process.env.npm_config_printAlbums;
 const updateLib = !!process.env.npm_config_updateLib;
 const writeSource = !!process.env.npm_config_writeSource;
@@ -17,6 +18,7 @@ const isTurbo = !!process.env.npm_config_turbo;
 readPackage().then(async ({ name, version }) => {
   console.log(`Starting ${kleur.green(`${name} v${version}`)}\n`);
   let printtype = '';
+  let printFilter = '';
 
   if (printArtistsWithoutArt) {
     printtype = 'artists-without-art';
@@ -27,9 +29,13 @@ readPackage().then(async ({ name, version }) => {
   if (printAlbums) {
     printtype = 'albums';
   }
+  if (printAlbumsWithoutArt) {
+    printtype = 'albums';
+    printFilter = 'unknown';
+  }
   if (printtype) {
-    const list = JSON.parse(await readOutputfile(printtype));
-    printTable(list, printtype);
+    const list = JSON.parse(await readOutputfile(printtype, printFilter));
+    printTable(list, printtype, printFilter);
     process.exit(0);
   }
   if (updateLib) {

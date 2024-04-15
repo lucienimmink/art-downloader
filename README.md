@@ -20,6 +20,7 @@ The following variables should be set in `.env`:
 - `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
 - `--printArtists` will print a list of all artists and their MBID.
 - `--printAlbums` will print a list of all albums and the URL to the source of the art
+- `--printAlbumsWithoutArt` will print a list of all albums that have no source for their MBID
 - `--updateLib` will extend the source `MUSIC_FILE` with the MBIDs
 - `--writeSource` will write `cover.jpg` files in the folder per album found in `SOURCE_BASE`
 

@@ -7,8 +7,23 @@ export const readMusicFile = async () => {
   return await fs.readFile(MUSIC_FILE || `src/node-music.json`, 'utf8');
 };
 
-export const readOutputfile = async type => {
-  return await fs.readFile(`output/${type}.json`, 'utf8');
+export const readOutputfile = async (type, filter = '') => {
+  const data = await fs.readFile(`output/${type}.json`, 'utf8');
+  if (filter === 'unknown') {
+    const list = JSON.parse(data);
+    const albums = Object.keys(list);
+    const unknown = albums.filter(key => {
+      return (
+        JSON.parse(list[key])?.url === '' && JSON.parse(list[key])?.mbid !== ''
+      );
+    });
+    const unkownAlbums = new Map();
+    unknown.forEach(id => {
+      unkownAlbums.set(id, list[id]);
+    });
+    return JSON.stringify(Object.fromEntries(unkownAlbums));
+  }
+  return data;
 };
 
 export const readJSON = async type => {
