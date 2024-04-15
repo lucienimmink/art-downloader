@@ -22,7 +22,7 @@ The following variables should be set in `.env`:
 - `--printAlbums` will print a list of all albums and the URL to the source of the art
 - `--printAlbumsWithoutArt` will print a list of all albums that have no source for their MBID
 - `--updateLib` will extend the source `MUSIC_FILE` with the MBIDs
-- `--writeSource` will write `cover.jpg` files in the folder per album found in `SOURCE_BASE`
+- `--writeSource` will write `cover.[jpg|png|webp|...]` files in the folder per album found in `SOURCE_BASE`
 
 > Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
 

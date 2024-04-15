@@ -40,11 +40,19 @@ export const updateData = async (obj, artists, albums) => {
 
 export const updateWriteSource = async paths => {
   console.log(`\tUpdating ${kleur.green(paths.size)} source folders`);
+  const artFolder = await fs.readdir(art_folder);
   paths.forEach(async (path, mbid) => {
     try {
       const meta = fsSync.statSync(path);
       if (meta.isDirectory()) {
-        await fs.copyFile(`${art_folder}/${mbid}.jpg`, `${path}/cover.jpg`);
+        const artFile = artFolder.filter(file => file.includes(mbid));
+        if (artFile.length === 1) {
+          const extension = artFile[0].split('.')[1];
+          await fs.copyFile(
+            `${art_folder}/${mbid}.${extension}`,
+            `${path}/cover.${extension}`,
+          );
+        }
       }
     } catch (e) {
       console.error(e);
