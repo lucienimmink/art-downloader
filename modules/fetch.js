@@ -161,14 +161,14 @@ export const getArtForArtists = async (map, isTurbo = false) => {
   spinner.stop();
   if (!isTurbo) {
     console.log(
-      `\tChecking cache and resolving URLs: 
-      \t\tCached: ${kleur.green(count - fetched)} 
+      `\tChecking cache and resolving URLs:
+      \t\tCached: ${kleur.green(count - fetched)}
       \t\tNew: ${kleur.green(fetched)}
       \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
     );
   } else {
     console.log(
-      `\tResolving URLs: 
+      `\tResolving URLs:
       \t\tNew: ${kleur.green(fetched)}
       \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
     );
@@ -205,14 +205,14 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
   spinner.stop();
   if (!isTurbo) {
     console.log(
-      `\tChecking cache and resolving URLs: 
-      \t\tCached: ${kleur.green(count - fetch)} 
+      `\tChecking cache and resolving URLs:
+      \t\tCached: ${kleur.green(count - fetch)}
       \t\tNew: ${kleur.green(fetch)}
       \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
     );
   } else {
     console.log(
-      `\tResolving URLs: 
+      `\tResolving URLs:
       \t\tNew: ${kleur.green(fetch)}
       \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
     );
@@ -297,7 +297,7 @@ export const downloadImageForMBIDs = async map => {
       sleep(100);
       console.log(`\t\tDownloading: ${kleur.green(url)} ...`);
       const res = await fetch(url);
-      writeBlob(key, res);
+      writeBlob(key, res, url);
     }
   });
 };

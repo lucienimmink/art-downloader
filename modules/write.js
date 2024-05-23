@@ -13,9 +13,9 @@ export const writeMap = async (map, name = 'artists') => {
   await fs.writeFile(`output/${name}.json`, json);
 };
 
-export const writeBlob = async (key, res) => {
-  // const fileType = await fileTypeFromStream(res.body);
-  res.body.pipe(fsSync.createWriteStream(`${art_folder}/${key}.jpg`));
+export const writeBlob = async (key, res, url) => {
+  const fileType = url.split('.').pop();
+  res.body.pipe(fsSync.createWriteStream(`${art_folder}/${key}.${fileType}`));
 };
 
 export const isAlreadyDownloaded = async mbid => {
