@@ -136,14 +136,14 @@ export const getArtForArtists = async (map, isTurbo = false) => {
       } catch (e) {
         // not found in FanArt
         try {
-          const url = await getAudioDB(key);
+          const url = await getDeezer(key);
           if (url) {
             fetched++;
             mBIDToUrlMap.set(mbid, url);
           } else {
             artistsWithoutArt.set(key, mbid);
           }
-        } catch (e) {
+        } catch (ee) {
           // not found in AudioDB
           artistsWithoutArt.set(key, mbid);
         }
@@ -251,7 +251,6 @@ const getArtistMBID = async artist => {
 };
 
 export const getFanArt = async mbid => {
-  await sleep(200); // rate-limit :(
   const response = await fetch(
     `https://webservice.fanart.tv/v3/music/${mbid}&?api_key=${FANARTAPIKEY}&format=json`,
   );
@@ -265,31 +264,6 @@ export const getFanArt = async mbid => {
   throw Error('no art found in provider fanart');
 };
 
-export const getAudioDB = async artist => {
-  await sleep(1500);
-  const response = await fetch(
-    `https://www.theaudiodb.com/api/v1/json/2/search.php?s=${encodeURIComponent(
-      artist,
-    )}`,
-  );
-  if (response.status === 200) {
-    const json = await response.json();
-    const { artists } = json;
-    if (artists) {
-      return artists[0].strArtistThumb || artists[0].strArtistFanart;
-    }
-  }
-  if (response.status === 429) {
-    // or whatever status it is
-    // we are being rate-limited; let's wait a while
-    console.log(kleur.bgRed('Rate limited, sleeping for a while'));
-    await sleep(1000 * 60); // 1 minute should do it?
-    // retry this
-    return getAudioDB(artist);
-  }
-  throw Error('no art found in provider audiodb');
-};
-
 export const downloadImageForMBIDs = async map => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
@@ -300,4 +274,18 @@ export const downloadImageForMBIDs = async map => {
       writeBlob(key, res, url);
     }
   });
+};
+
+export const getDeezer = async artist => {
+  const response = await fetch(
+    `https://api.deezer.com/search/artist?q=${encodeURIComponent(artist)}`,
+  );
+  if (response.status === 200) {
+    const json = await response.json();
+    const { data } = json;
+    if (data) {
+      return data[0].picture_xl;
+    }
+  }
+  throw Error('no art found in provider deezer');
 };
