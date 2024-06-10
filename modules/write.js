@@ -49,15 +49,15 @@ export const updateWriteSource = async paths => {
       if (meta.isDirectory()) {
         const artFile = artFolder.filter(file => file.includes(mbid));
         if (artFile.length === 1) {
-          const extension = artFile[0].split('.')[1];
+          const fileType = artFile[0].split('.').pop();
           await fs.copyFile(
-            `${art_folder}/${mbid}.${extension}`,
-            `${path}/cover.${extension}`,
+            `${art_folder}/${mbid}.${fileType}`,
+            `${path}/cover.${fileType}`,
           );
         }
       }
     } catch (e) {
-      console.error(e);
+      console.warn(`⚠️  ${path} ${kleur.red('not found')}`);
     }
   });
 };
