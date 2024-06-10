@@ -144,7 +144,7 @@ export const getArtForArtists = async (map, isTurbo = false) => {
             artistsWithoutArt.set(key, mbid);
           }
         } catch (ee) {
-          // not found in AudioDB
+          // not found in Deezer
           artistsWithoutArt.set(key, mbid);
         }
       }
