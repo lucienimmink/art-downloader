@@ -1,6 +1,5 @@
 import * as fs from 'fs/promises';
 import * as fsSync from 'fs';
-import { fileTypeFromStream } from 'file-type';
 import kleur from 'kleur';
 
 const { ART_FOLDER, MUSIC_FILE } = process.env;
