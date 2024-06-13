@@ -40,7 +40,8 @@ export const updateData = async (obj, artists, albums) => {
 };
 
 export const updateWriteSource = async paths => {
-  console.log(`\tUpdating ${kleur.green(paths.size)} source folders`);
+  let newFiles = 0;
+  console.log(`\tChecking ${kleur.green(paths.size)} source folders`);
   const artFolder = await fs.readdir(art_folder);
   paths.forEach(async (path, mbid) => {
     try {
@@ -49,14 +50,21 @@ export const updateWriteSource = async paths => {
         const artFile = artFolder.filter(file => file.includes(mbid));
         if (artFile.length === 1) {
           const fileType = artFile[0].split('.').pop();
-          await fs.copyFile(
-            `${art_folder}/${mbid}.${fileType}`,
-            `${path}/cover.${fileType}`,
-          );
+          const stat = fsSync.statSync(`${path}/cover.${fileType}`);
+          if (!stat.isFile()) {
+            await fs.copyFile(
+              `${art_folder}/${mbid}.${fileType}`,
+              `${path}/cover.${fileType}`,
+            );
+            newFiles++;
+          }
         }
       }
     } catch (e) {
       console.warn(`⚠️  ${path} ${kleur.red('not found')}`);
     }
   });
+  console.log(
+    `\tUpdated ${kleur.green(newFiles)} source folder${newFiles === 1 ? '' : 's'}`,
+  );
 };
