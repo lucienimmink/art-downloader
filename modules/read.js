@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises';
+import * as fs from 'node:fs/promises';
 import kleur from 'kleur';
 
 const { MUSIC_FILE, SOURCE_BASE } = process.env;
