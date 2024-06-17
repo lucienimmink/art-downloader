@@ -74,7 +74,7 @@ const handleUpdate = async (data, artists, albums) => {
   }
 };
 
-const handleWriteSource = async paths => {
+const handleWriteSource = paths => {
   try {
     return updateWriteSource(paths);
   } catch (e) {
@@ -100,7 +100,7 @@ export const handle = async (data, type, isTurbo = false) => {
       break;
     case 'writeSource':
       const paths = await readData(data, 'path', false);
-      await handleWriteSource(paths);
+      handleWriteSource(paths);
       break;
     default:
       console.log(`\tCannot handle type ${kleur.red(type)}`);

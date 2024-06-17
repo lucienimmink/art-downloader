@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises';
-import * as fsSync from 'fs';
+import * as fs from 'node:fs/promises';
+import * as fsSync from 'node:fs';
 import kleur from 'kleur';
 
 const { ART_FOLDER, MUSIC_FILE } = process.env;
@@ -39,28 +39,24 @@ export const updateData = async (obj, artists, albums) => {
   return await fs.writeFile(MUSIC_FILE || `src/node-music.json`, json);
 };
 
-export const updateWriteSource = async paths => {
+export const updateWriteSource = paths => {
   let newFiles = 0;
   console.log(`\tChecking ${kleur.green(paths.size)} source folders`);
-  const artFolder = await fs.readdir(art_folder);
-  paths.forEach(async (path, mbid) => {
-    try {
-      const meta = fsSync.statSync(path);
-      if (meta.isDirectory()) {
-        const artFile = artFolder.filter(file => file.includes(mbid));
-        if (artFile.length === 1) {
-          const fileType = artFile[0].split('.').pop();
-          const stat = fsSync.statSync(`${path}/cover.${fileType}`);
-          if (!stat.isFile()) {
-            await fs.copyFile(
-              `${art_folder}/${mbid}.${fileType}`,
-              `${path}/cover.${fileType}`,
-            );
-            newFiles++;
-          }
+  const artFolder = fsSync.readdirSync(art_folder);
+  paths.forEach((path, mbid) => {
+    if (fsSync.existsSync(path)) {
+      const artFile = artFolder.filter(file => file.includes(mbid));
+      if (artFile.length === 1) {
+        const fileType = artFile[0].split('.').pop();
+        if (!fsSync.existsSync(`${path}/cover.${fileType}`)) {
+          fsSync.copyFileSync(
+            `${art_folder}/${mbid}.${fileType}`,
+            `${path}/cover.${fileType}`,
+          );
+          newFiles++;
         }
       }
-    } catch (e) {
+    } else {
       console.warn(`⚠️  ${path} ${kleur.red('not found')}`);
     }
   });
