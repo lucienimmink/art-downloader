@@ -190,7 +190,20 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
     const { mbid, url } = JSON.parse(json);
     const hasMBID = !!mbid;
     if (hasMBID && url && !(await isAlreadyDownloaded(mbid))) {
-      mBIDToUrlMapForAlbums.set(mbid, url);
+      try {
+        // prefer deezer, has higher quality images
+        const artist = key.split('|||').shift();
+        const album = key.split('|||').pop();
+        const dUrl = await getDeezerAlbum({ artist, album });
+        if (dUrl) {
+          mBIDToUrlMapForAlbums.set(mbid, dUrl);
+        } else {
+          mBIDToUrlMapForAlbums.set(mbid, url);
+        }
+      } catch (ee) {
+        // not found in Deezer, but we always have last.fm
+        mBIDToUrlMapForAlbums.set(mbid, url);
+      }
       fetch++;
     }
     count++;
@@ -284,7 +297,22 @@ export const getDeezer = async artist => {
     const json = await response.json();
     const { data } = json;
     if (data) {
-      return data[0].picture_xl;
+      const url = data[0].picture_xl;
+      if (!url.includes('/artist//')) return url;
+    }
+  }
+  throw Error('no art found in provider deezer');
+};
+
+export const getDeezerAlbum = async ({ artist, album }) => {
+  const response = await fetch(
+    `https://api.deezer.com/search/album?q=${encodeURIComponent(artist)} - ${encodeURIComponent(album)}`,
+  );
+  if (response.status === 200) {
+    const json = await response.json();
+    const { data } = json;
+    if (data) {
+      return data[0].cover_xl;
     }
   }
   throw Error('no art found in provider deezer');
