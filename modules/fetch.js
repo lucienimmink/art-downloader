@@ -4,8 +4,8 @@ import kleur from 'kleur';
 import { asyncForEach, sleep } from './helpers.js';
 import { writeBlob, isAlreadyDownloaded } from './write.js';
 import timeSpan from './hms.js';
-
-const { LASTFMAPIKEY, FANARTAPIKEY } = process.env;
+import { getMetaInfo } from './providers/metainfo.js';
+import { fetchArtForArtist, fetchArtForAlbum } from './fetchArt.js';
 
 const getMBIDForArtists = async (map, isTurbo = false) => {
   const start = new Date().getTime();
@@ -126,27 +126,11 @@ export const getArtForArtists = async (map, isTurbo = false) => {
     const hasMBID = !!mbid;
     if (hasMBID && !(await isAlreadyDownloaded(mbid))) {
       try {
-        const url = await getFanArt(mbid);
-        if (url) {
-          fetched++;
-          mBIDToUrlMap.set(mbid, url);
-        } else {
-          artistsWithoutArt.set(key, mbid);
-        }
-      } catch (e) {
-        // not found in FanArt
-        try {
-          const url = await getDeezer(key);
-          if (url) {
-            fetched++;
-            mBIDToUrlMap.set(mbid, url);
-          } else {
-            artistsWithoutArt.set(key, mbid);
-          }
-        } catch (ee) {
-          // not found in Deezer
-          artistsWithoutArt.set(key, mbid);
-        }
+        const url = await fetchArtForArtist(key, mbid);
+        fetched++;
+        mBIDToUrlMap.set(mbid, url);
+      } catch (ee) {
+        artistsWithoutArt.set(key, mbid);
       }
     }
     count++;
@@ -190,21 +174,14 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
     const { mbid, url } = JSON.parse(json);
     const hasMBID = !!mbid;
     if (hasMBID && url && !(await isAlreadyDownloaded(mbid))) {
+      const artist = key.split('|||').shift();
+      const album = key.split('|||').pop();
       try {
         // prefer deezer, has higher quality images
-        const artist = key.split('|||').shift();
-        const album = key.split('|||').pop();
-        const dUrl = await getDeezerAlbum({ artist, album });
-        if (dUrl) {
-          mBIDToUrlMapForAlbums.set(mbid, dUrl);
-        } else {
-          mBIDToUrlMapForAlbums.set(mbid, url);
-        }
-      } catch (ee) {
-        // not found in Deezer, but we always have last.fm
+        const url = await fetchArtForAlbum({ artist, album, mbid });
         mBIDToUrlMapForAlbums.set(mbid, url);
-      }
-      fetch++;
+        fetch++;
+      } catch (ee) {}
     }
     count++;
     if (count % percent === 0) {
@@ -232,24 +209,6 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
   }
   return mBIDToUrlMapForAlbums;
 };
-const getMetaInfo = async ({ artist, album }) => {
-  const searchParams = new URLSearchParams();
-  searchParams.set('api_key', LASTFMAPIKEY);
-  searchParams.set('artist', artist);
-  searchParams.set('format', 'json');
-  searchParams.set('autoCorrect', 'true');
-  if (album) {
-    searchParams.set('method', 'album.getinfo');
-    searchParams.set('album', album);
-  } else {
-    searchParams.set('method', 'artist.getinfo');
-  }
-  const response = await fetch(
-    `https://ws.audioscrobbler.com/2.0/?${searchParams}`,
-  );
-  const json = await response.json();
-  return json;
-};
 
 const getArtistMBID = async artist => {
   await sleep(1000); // https://wiki.musicbrainz.org/MusicBrainz_API/Rate_Limiting
@@ -263,20 +222,6 @@ const getArtistMBID = async artist => {
   return artists[0].id;
 };
 
-export const getFanArt = async mbid => {
-  const response = await fetch(
-    `https://webservice.fanart.tv/v3/music/${mbid}&?api_key=${FANARTAPIKEY}&format=json`,
-  );
-  if (response.status === 200) {
-    const json = await response.json();
-    const { artistthumb } = json;
-    if (artistthumb) {
-      return artistthumb[0].url;
-    }
-  }
-  throw Error('no art found in provider fanart');
-};
-
 export const downloadImageForMBIDs = async map => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
@@ -287,33 +232,4 @@ export const downloadImageForMBIDs = async map => {
       writeBlob(key, res, url);
     }
   });
-};
-
-export const getDeezer = async artist => {
-  const response = await fetch(
-    `https://api.deezer.com/search/artist?q=${encodeURIComponent(artist)}`,
-  );
-  if (response.status === 200) {
-    const json = await response.json();
-    const { data } = json;
-    if (data) {
-      const url = data[0].picture_xl;
-      if (!url.includes('/artist//')) return url;
-    }
-  }
-  throw Error('no art found in provider deezer');
-};
-
-export const getDeezerAlbum = async ({ artist, album }) => {
-  const response = await fetch(
-    `https://api.deezer.com/search/album?q=${encodeURIComponent(artist)} - ${encodeURIComponent(album)}`,
-  );
-  if (response.status === 200) {
-    const json = await response.json();
-    const { data } = json;
-    if (data) {
-      return data[0].cover_xl;
-    }
-  }
-  throw Error('no art found in provider deezer');
 };
