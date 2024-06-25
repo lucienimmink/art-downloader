@@ -111,6 +111,7 @@ src
 output/artists.json
 output/albums.json
 output/artists-without-art.json
+output/albums-without-art.json
 output/art/*.png
 output/art/*.jpg
 output/art/*.jpeg

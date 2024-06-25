@@ -59,11 +59,18 @@ const handleAlbums = async (data, isTurbo = false) => {
   const map = await readData(data, 'albums', isTurbo);
   const newMBIDs = await getMBID(map, 'albums');
   writeMap(map, 'albums');
-  const mBIDToUrlMap = await getArtForAlbums(isTurbo ? newMBIDs : map, isTurbo);
-  if (mBIDToUrlMap.size !== 0) {
-    console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
-    await downloadImageForMBIDs(mBIDToUrlMap);
+  const { mBIDToUrlMapForAlbums, albumsWithoutArt } = await getArtForAlbums(
+    isTurbo ? newMBIDs : map,
+    isTurbo,
+  );
+  if (mBIDToUrlMapForAlbums.size !== 0) {
+    console.log(`\tDownload: ${kleur.green(mBIDToUrlMapForAlbums.size)}`);
+    await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
   }
+  if (albumsWithoutArt.size !== 0) {
+    console.log(`\tWithout art: ${kleur.red(albumsWithoutArt.size)}`);
+  }
+  await writeMap(albumsWithoutArt, 'albums-without-art');
 };
 
 const handleUpdate = async (data, artists, albums) => {

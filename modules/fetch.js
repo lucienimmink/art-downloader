@@ -161,6 +161,7 @@ export const getArtForArtists = async (map, isTurbo = false) => {
 };
 export const getArtForAlbums = async (map, isTurbo = false) => {
   const mBIDToUrlMapForAlbums = new Map();
+  const albumsWithoutArt = new Map();
   const start = new Date().getTime();
   const percent = Math.ceil(map.size / 100);
   let count = 0;
@@ -177,11 +178,12 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
       const artist = key.split('|||').shift();
       const album = key.split('|||').pop();
       try {
-        // prefer deezer, has higher quality images
         const url = await fetchArtForAlbum({ artist, album, mbid });
         mBIDToUrlMapForAlbums.set(mbid, url);
         fetch++;
-      } catch (ee) {}
+      } catch (ee) {
+        albumsWithoutArt.set(key, mbid);
+      }
     }
     count++;
     if (count % percent === 0) {
@@ -207,7 +209,7 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
       \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
     );
   }
-  return mBIDToUrlMapForAlbums;
+  return { mBIDToUrlMapForAlbums, albumsWithoutArt };
 };
 
 const getArtistMBID = async artist => {
