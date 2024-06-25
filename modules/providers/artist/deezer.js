@@ -13,7 +13,7 @@ const fetchArt = async artist => {
       if (!url.includes('/artist//')) return url;
     }
     if (error.code === 4) {
-      sleep(100);
+      await sleep(100);
       return await fetchArt(artist);
     }
   }
