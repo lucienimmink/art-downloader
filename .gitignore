@@ -113,4 +113,5 @@ output/albums.json
 output/artists-without-art.json
 output/art/*.png
 output/art/*.jpg
+output/art/*.jpeg
 output/art/*.webp
