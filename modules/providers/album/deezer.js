@@ -3,12 +3,12 @@ import { sleep } from './../../helpers.js';
 
 const fetchArt = async ({ artist, album }) => {
   const response = await fetchWithTimeout(
-    `https://api.deezer.com/search/album?q=${encodeURIComponent(artist)} - ${encodeURIComponent(album)}`,
+    `https://api.deezer.com/search/album?q=artist:"${encodeURIComponent(artist)}" album:"${encodeURIComponent(album)}"`,
   );
   if (response.status === 200) {
     const json = await response.json();
-    const { data, error } = json;
-    if (data) {
+    const { data, error, total } = json;
+    if (data && total > 0) {
       return data[0].cover_xl;
     }
     if (error.code === 4) {

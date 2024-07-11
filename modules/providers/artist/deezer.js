@@ -3,12 +3,12 @@ import { sleep } from './../../helpers.js';
 
 const fetchArt = async artist => {
   const response = await fetchWithTimeout(
-    `https://api.deezer.com/search/artist?q=${encodeURIComponent(artist)}`,
+    `https://api.deezer.com/search/artist?q=artist:"${encodeURIComponent(artist)}"`,
   );
   if (response.status === 200) {
     const json = await response.json();
-    const { data, error } = json;
-    if (data) {
+    const { data, error, total } = json;
+    if (data && total > 0) {
       const url = data[0].picture_xl;
       if (!url.includes('/artist//')) return url;
     }
