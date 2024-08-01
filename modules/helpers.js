@@ -29,11 +29,12 @@ const cleanCacheMap = (map, cache) => {
 };
 const readData = async (data, type, print = true) => {
   const map = populateMap(data, type);
-  if (print) console.log(`\tFound: ${styleText('green', map.size)}`);
+  if (print) console.log(`\tFound: ${styleText('green', map.size.toString())}`);
 
   const cache = await readJSON(type);
   const cachedMap = cleanCacheMap(map, cache);
-  if (print) console.log(`\tCached: ${styleText('green', cachedMap.size)}`);
+  if (print)
+    console.log(`\tCached: ${styleText('green', cachedMap.size.toString())}`);
 
   return new Map([...map, ...cachedMap]);
 };
@@ -46,11 +47,15 @@ const handleArtists = async (data, isTurbo = false) => {
     isTurbo,
   );
   if (mBIDToUrlMap.size !== 0) {
-    console.log(`\tDownload: ${styleText('green', mBIDToUrlMap.size)}`);
+    console.log(
+      `\tDownload: ${styleText('green', mBIDToUrlMap.size.toString())}`,
+    );
     await downloadImageForMBIDs(mBIDToUrlMap);
   }
   if (artistsWithoutArt.size !== 0) {
-    console.log(`\tWithout art: ${styleText('red', artistsWithoutArt.size)}`);
+    console.log(
+      `\tWithout art: ${styleText('red', artistsWithoutArt.size.toString())}`,
+    );
   }
   await writeMap(artistsWithoutArt, 'artists-without-art');
 };
@@ -65,12 +70,14 @@ const handleAlbums = async (data, isTurbo = false) => {
   );
   if (mBIDToUrlMapForAlbums.size !== 0) {
     console.log(
-      `\tDownload: ${styleText('green', mBIDToUrlMapForAlbums.size)}`,
+      `\tDownload: ${styleText('green', mBIDToUrlMapForAlbums.size.toString())}`,
     );
     await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
   }
   if (albumsWithoutArt.size !== 0) {
-    console.log(`\tWithout art: ${styleText('red', albumsWithoutArt.size)}`);
+    console.log(
+      `\tWithout art: ${styleText('red', albumsWithoutArt.size.toString())}`,
+    );
   }
   await writeMap(albumsWithoutArt, 'albums-without-art');
 };

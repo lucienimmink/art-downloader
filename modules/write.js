@@ -41,7 +41,9 @@ export const updateData = async (obj, artists, albums) => {
 
 export const updateWriteSource = paths => {
   let newFiles = 0;
-  console.log(`\tChecking ${styleText('green', paths.size)} source folders`);
+  console.log(
+    `\tChecking ${styleText('green', paths.size.toString())} source folders`,
+  );
   const artFolder = fsSync.readdirSync(art_folder);
   paths.forEach((path, mbid) => {
     if (fsSync.existsSync(path)) {
@@ -61,6 +63,6 @@ export const updateWriteSource = paths => {
     }
   });
   console.log(
-    `\tUpdated ${styleText('green', newFiles)} source folder${newFiles === 1 ? '' : 's'}`,
+    `\tUpdated ${styleText('green', newFiles.toString())} source folder${newFiles === 1 ? '' : 's'}`,
   );
 };

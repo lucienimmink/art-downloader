@@ -14,7 +14,7 @@ const getMBIDForArtists = async (map, isTurbo = false) => {
   let fetched = 0;
   const newMBIDs = new Map();
   const spinner = ora(
-    `\tFetching MBIDs: ${styleText('green', map.size)}`,
+    `\tFetching MBIDs: ${styleText('green', map.size.toString())}`,
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const hasMBID = !!map.get(key);
@@ -33,16 +33,14 @@ const getMBIDForArtists = async (map, isTurbo = false) => {
           `\n\t\tEncountered an error while getting meta-info for ${styleText(
             'yellow',
             key,
-          )} with MBID ${styleText('yellow', mbid)}`,
+          )} with ${styleText('yellow', key)}`,
         );
       }
     }
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `\tFetching MBIDs: ${styleText('green', map.size)} - ${
-        count / percent
-      }% done`;
+      spinner.text = `\tFetching MBIDs: ${styleText('green', map.size.toString())} - ${count / percent}% done`;
     }
   });
   const stop = new Date().getTime();
@@ -50,7 +48,7 @@ const getMBIDForArtists = async (map, isTurbo = false) => {
   console.log(
     `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${styleText(
       'green',
-      fetched,
+      fetched.toString(),
     )} in ${styleText('yellow', timeSpan(stop - start))}`,
   );
   return newMBIDs;
@@ -63,7 +61,7 @@ const getMBIDForAlbums = async (map, isTurbo = false) => {
   let fetched = 0;
   const newMBIDs = new Map();
   const spinner = ora(
-    `\tFetching MBIDs: ${styleText('green', map.size)}`,
+    `\tFetching MBIDs: ${styleText('green', map.size.toString())}`,
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const split = key.split('|||');
@@ -91,9 +89,7 @@ const getMBIDForAlbums = async (map, isTurbo = false) => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `\tFetching MBIDs: ${styleText('green', map.size)} - ${
-        count / percent
-      }% done`;
+      spinner.text = `\tFetching MBIDs: ${styleText('green', map.size.toString())} - ${count / percent}% done`;
     }
   });
   const stop = new Date().getTime();
@@ -101,7 +97,7 @@ const getMBIDForAlbums = async (map, isTurbo = false) => {
   console.log(
     `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${styleText(
       'green',
-      fetched,
+      fetched.toString(),
     )} in ${styleText('yellow', timeSpan(stop - start))}`,
   );
   return newMBIDs;
@@ -127,7 +123,7 @@ export const getArtForArtists = async (map, isTurbo = false) => {
   let count = 0;
   let fetched = 0;
   const spinner = ora(
-    `\tChecking cache and resolving URLs: ${styleText('green', map.size)}`,
+    `\tChecking cache and resolving URLs: ${styleText('green', map.size.toString())}`,
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
@@ -146,7 +142,7 @@ export const getArtForArtists = async (map, isTurbo = false) => {
       spinner.color = 'yellow';
       spinner.text = `\tChecking cache and resolving URLs: ${styleText(
         'yellow',
-        count / percent,
+        (count / percent).toString(),
       )}%`;
     }
   });
@@ -155,14 +151,14 @@ export const getArtForArtists = async (map, isTurbo = false) => {
   if (!isTurbo) {
     console.log(
       `\tChecking cache and resolving URLs:
-      \t\tCached: ${styleText('green', count - fetched)}
-      \t\tNew: ${styleText('green', fetched)}
+      \t\tCached: ${styleText('green', (count - fetched).toString())}
+      \t\tNew: ${styleText('green', fetched.toString())}
       \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   } else {
     console.log(
       `\tResolving URLs:
-      \t\tNew: ${styleText('green', fetched)}
+      \t\tNew: ${styleText('green', fetched.toString())}
       \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   }
@@ -176,7 +172,7 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
   let count = 0;
   let fetch = 0;
   const spinner = ora(
-    `\tChecking cache and resolving URLs: ${styleText('green', map.size)}`,
+    `\tChecking cache and resolving URLs: ${styleText('green', map.size.toString())}`,
   ).start();
 
   await asyncForEach(Array.from(map.keys()), async key => {
@@ -199,7 +195,7 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
       spinner.color = 'yellow';
       spinner.text = `\tChecking cache and resolving URLs: ${styleText(
         'yellow',
-        count / percent,
+        (count / percent).toString(),
       )}%`;
     }
   });
@@ -208,14 +204,14 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
   if (!isTurbo) {
     console.log(
       `\tChecking cache and resolving URLs:
-      \t\tCached: ${styleText('green', count - fetch)}
-      \t\tNew: ${styleText('green', fetch)}
+      \t\tCached: ${styleText('green', (count - fetch).toString())}
+      \t\tNew: ${styleText('green', fetch.toString())}
       \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   } else {
     console.log(
       `\tResolving URLs:
-      \t\tNew: ${styleText('green', fetch)}
+      \t\tNew: ${styleText('green', fetch.toString())}
       \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   }
