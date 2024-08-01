@@ -1,5 +1,5 @@
 import Table from 'cli-table';
-import kleur from 'kleur';
+import { styleText } from 'node:util';
 import { sortAlbums, sortArtists } from './helpers.js';
 
 const texts = {
@@ -19,11 +19,14 @@ const texts = {
 
 export const printTable = (list, type, filter = '') => {
   if (Object.keys(list).length === 0) {
-    console.log(kleur.green(texts[type].empty));
+    console.log(styleText('green', texts[type].empty));
     return;
   }
   console.log(
-    kleur.yellow(texts[type].title + ' (' + Object.keys(list).length + ')'),
+    styleText(
+      'yellow',
+      texts[type].title + ' (' + Object.keys(list).length + ')',
+    ),
   );
   if (type === 'artists-without-art' || type === 'artists') {
     printArtistTable(list, filter);

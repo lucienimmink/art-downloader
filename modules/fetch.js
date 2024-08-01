@@ -1,6 +1,6 @@
 import fetch from 'node-fetch';
 import ora from 'ora';
-import kleur from 'kleur';
+import { styleText } from 'node:util';
 import { asyncForEach, sleep } from './helpers.js';
 import { writeBlob, isAlreadyDownloaded } from './write.js';
 import timeSpan from './hms.js';
@@ -13,7 +13,9 @@ const getMBIDForArtists = async (map, isTurbo = false) => {
   let count = 0;
   let fetched = 0;
   const newMBIDs = new Map();
-  const spinner = ora(`\tFetching MBIDs: ${kleur.green(map.size)}`).start();
+  const spinner = ora(
+    `\tFetching MBIDs: ${styleText('green', map.size)}`,
+  ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const hasMBID = !!map.get(key);
     if (!hasMBID) {
@@ -28,16 +30,17 @@ const getMBIDForArtists = async (map, isTurbo = false) => {
         fetched++;
       } catch (e) {
         console.log(
-          `\n\t\tEncountered an error while getting meta-info for ${kleur.yellow(
+          `\n\t\tEncountered an error while getting meta-info for ${styleText(
+            'yellow',
             key,
-          )} with MBID ${kleur.yellow(mbid)}`,
+          )} with MBID ${styleText('yellow', mbid)}`,
         );
       }
     }
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `\tFetching MBIDs: ${kleur.green(map.size)} - ${
+      spinner.text = `\tFetching MBIDs: ${styleText('green', map.size)} - ${
         count / percent
       }% done`;
     }
@@ -45,9 +48,10 @@ const getMBIDForArtists = async (map, isTurbo = false) => {
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${kleur.green(
+    `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${styleText(
+      'green',
       fetched,
-    )} in ${kleur.yellow(timeSpan(stop - start))}`,
+    )} in ${styleText('yellow', timeSpan(stop - start))}`,
   );
   return newMBIDs;
 };
@@ -58,7 +62,9 @@ const getMBIDForAlbums = async (map, isTurbo = false) => {
   let count = 0;
   let fetched = 0;
   const newMBIDs = new Map();
-  const spinner = ora(`\tFetching MBIDs: ${kleur.green(map.size)}`).start();
+  const spinner = ora(
+    `\tFetching MBIDs: ${styleText('green', map.size)}`,
+  ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const split = key.split('|||');
     const artist = split[0];
@@ -75,16 +81,17 @@ const getMBIDForAlbums = async (map, isTurbo = false) => {
         fetched++;
       } catch (e) {
         console.log(
-          `\n\t\tEncountered an error while getting meta-info for ${kleur.yellow(
+          `\n\t\tEncountered an error while getting meta-info for ${styleText(
+            'yellow',
             artist,
-          )} - ${kleur.yellow(salbum)}`,
+          )} - ${styleText('yellow', salbum)}`,
         );
       }
     }
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `\tFetching MBIDs: ${kleur.green(map.size)} - ${
+      spinner.text = `\tFetching MBIDs: ${styleText('green', map.size)} - ${
         count / percent
       }% done`;
     }
@@ -92,9 +99,10 @@ const getMBIDForAlbums = async (map, isTurbo = false) => {
   const stop = new Date().getTime();
   spinner.stop();
   console.log(
-    `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${kleur.green(
+    `\tFetched MBID${fetched !== 1 ? 's' : ''}: ${styleText(
+      'green',
       fetched,
-    )} in ${kleur.yellow(timeSpan(stop - start))}`,
+    )} in ${styleText('yellow', timeSpan(stop - start))}`,
   );
   return newMBIDs;
 };
@@ -106,7 +114,7 @@ export const getMBID = async (map, type, isTurbo = false) => {
     case 'albums':
       return await getMBIDForAlbums(map, isTurbo);
     default:
-      console.log(`\tCannot handle type ${kleur.red(type)}`);
+      console.log(`\tCannot handle type ${styleText('red', type)}`);
       return new Map();
   }
 };
@@ -119,7 +127,7 @@ export const getArtForArtists = async (map, isTurbo = false) => {
   let count = 0;
   let fetched = 0;
   const spinner = ora(
-    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`,
+    `\tChecking cache and resolving URLs: ${styleText('green', map.size)}`,
   ).start();
   await asyncForEach(Array.from(map.keys()), async key => {
     const mbid = map.get(key);
@@ -136,7 +144,8 @@ export const getArtForArtists = async (map, isTurbo = false) => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `\tChecking cache and resolving URLs: ${kleur.yellow(
+      spinner.text = `\tChecking cache and resolving URLs: ${styleText(
+        'yellow',
         count / percent,
       )}%`;
     }
@@ -146,15 +155,15 @@ export const getArtForArtists = async (map, isTurbo = false) => {
   if (!isTurbo) {
     console.log(
       `\tChecking cache and resolving URLs:
-      \t\tCached: ${kleur.green(count - fetched)}
-      \t\tNew: ${kleur.green(fetched)}
-      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+      \t\tCached: ${styleText('green', count - fetched)}
+      \t\tNew: ${styleText('green', fetched)}
+      \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   } else {
     console.log(
       `\tResolving URLs:
-      \t\tNew: ${kleur.green(fetched)}
-      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+      \t\tNew: ${styleText('green', fetched)}
+      \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   }
   return { mBIDToUrlMap, artistsWithoutArt };
@@ -167,7 +176,7 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
   let count = 0;
   let fetch = 0;
   const spinner = ora(
-    `\tChecking cache and resolving URLs: ${kleur.green(map.size)}`,
+    `\tChecking cache and resolving URLs: ${styleText('green', map.size)}`,
   ).start();
 
   await asyncForEach(Array.from(map.keys()), async key => {
@@ -188,7 +197,8 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
     count++;
     if (count % percent === 0) {
       spinner.color = 'yellow';
-      spinner.text = `\tChecking cache and resolving URLs: ${kleur.yellow(
+      spinner.text = `\tChecking cache and resolving URLs: ${styleText(
+        'yellow',
         count / percent,
       )}%`;
     }
@@ -198,15 +208,15 @@ export const getArtForAlbums = async (map, isTurbo = false) => {
   if (!isTurbo) {
     console.log(
       `\tChecking cache and resolving URLs:
-      \t\tCached: ${kleur.green(count - fetch)}
-      \t\tNew: ${kleur.green(fetch)}
-      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+      \t\tCached: ${styleText('green', count - fetch)}
+      \t\tNew: ${styleText('green', fetch)}
+      \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   } else {
     console.log(
       `\tResolving URLs:
-      \t\tNew: ${kleur.green(fetch)}
-      \t\tTime taken: ${kleur.yellow(timeSpan(stop - start))}`,
+      \t\tNew: ${styleText('green', fetch)}
+      \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
     );
   }
   return { mBIDToUrlMapForAlbums, albumsWithoutArt };
@@ -229,7 +239,7 @@ export const downloadImageForMBIDs = async map => {
     const url = map.get(key);
     if (url) {
       sleep(100);
-      console.log(`\t\tDownloading: ${kleur.green(url)} ...`);
+      console.log(`\t\tDownloading: ${styleText('green', url)} ...`);
       const res = await fetch(url);
       writeBlob(key, res, url);
     }

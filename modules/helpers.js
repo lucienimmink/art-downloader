@@ -1,4 +1,4 @@
-import kleur from 'kleur';
+import { styleText } from 'node:util';
 import {
   readJSON,
   populateMap,
@@ -29,11 +29,11 @@ const cleanCacheMap = (map, cache) => {
 };
 const readData = async (data, type, print = true) => {
   const map = populateMap(data, type);
-  if (print) console.log(`\tFound: ${kleur.green(map.size)}`);
+  if (print) console.log(`\tFound: ${styleText('green', map.size)}`);
 
   const cache = await readJSON(type);
   const cachedMap = cleanCacheMap(map, cache);
-  if (print) console.log(`\tCached: ${kleur.green(cachedMap.size)}`);
+  if (print) console.log(`\tCached: ${styleText('green', cachedMap.size)}`);
 
   return new Map([...map, ...cachedMap]);
 };
@@ -46,11 +46,11 @@ const handleArtists = async (data, isTurbo = false) => {
     isTurbo,
   );
   if (mBIDToUrlMap.size !== 0) {
-    console.log(`\tDownload: ${kleur.green(mBIDToUrlMap.size)}`);
+    console.log(`\tDownload: ${styleText('green', mBIDToUrlMap.size)}`);
     await downloadImageForMBIDs(mBIDToUrlMap);
   }
   if (artistsWithoutArt.size !== 0) {
-    console.log(`\tWithout art: ${kleur.red(artistsWithoutArt.size)}`);
+    console.log(`\tWithout art: ${styleText('red', artistsWithoutArt.size)}`);
   }
   await writeMap(artistsWithoutArt, 'artists-without-art');
 };
@@ -64,11 +64,13 @@ const handleAlbums = async (data, isTurbo = false) => {
     isTurbo,
   );
   if (mBIDToUrlMapForAlbums.size !== 0) {
-    console.log(`\tDownload: ${kleur.green(mBIDToUrlMapForAlbums.size)}`);
+    console.log(
+      `\tDownload: ${styleText('green', mBIDToUrlMapForAlbums.size)}`,
+    );
     await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
   }
   if (albumsWithoutArt.size !== 0) {
-    console.log(`\tWithout art: ${kleur.red(albumsWithoutArt.size)}`);
+    console.log(`\tWithout art: ${styleText('red', albumsWithoutArt.size)}`);
   }
   await writeMap(albumsWithoutArt, 'albums-without-art');
 };
@@ -91,7 +93,10 @@ const handleWriteSource = paths => {
 
 export const handle = async (data, type, isTurbo = false) => {
   console.log(
-    `Handling ${kleur.cyan(type.replace(/^\w/, c => c.toUpperCase()))} ${isTurbo ? `in ${kleur.green('turbo')} mode` : ``}`,
+    `Handling ${styleText(
+      'cyan',
+      type.replace(/^\w/, c => c.toUpperCase()),
+    )} ${isTurbo ? `in ${styleText('green', 'turbo')} mode` : ``}`,
   );
   switch (type) {
     case 'artists':
@@ -110,7 +115,7 @@ export const handle = async (data, type, isTurbo = false) => {
       handleWriteSource(paths);
       break;
     default:
-      console.log(`\tCannot handle type ${kleur.red(type)}`);
+      console.log(`\tCannot handle type ${styleText('red', type)}`);
   }
 };
 

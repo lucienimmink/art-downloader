@@ -1,4 +1,4 @@
-import kleur from 'kleur';
+import { styleText } from 'node:util';
 import { readPackage } from 'read-pkg';
 import { readMusicFile, readOutputfile } from './modules/read.js';
 import { printTable } from './modules/print.js';
@@ -16,7 +16,7 @@ const writeSource = !!process.env.npm_config_writeSource;
 const isTurbo = !!process.env.npm_config_turbo;
 
 readPackage().then(async ({ name, version }) => {
-  console.log(`Starting ${kleur.green(`${name} v${version}`)}\n`);
+  console.log(`Starting ${styleText('green', `${name} v${version}`)}\n`);
   let printtype = '';
   let printFilter = '';
 
@@ -60,5 +60,5 @@ readPackage().then(async ({ name, version }) => {
   await handle(data, 'update');
   await handle(data, 'writeSource');
   const stop = new Date().getTime();
-  console.log(`Finished in ${kleur.yellow(timeSpan(stop - start))}`);
+  console.log(`Finished in ${styleText('yellow', timeSpan(stop - start))}`);
 });

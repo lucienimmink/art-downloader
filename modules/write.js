@@ -1,6 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
-import kleur from 'kleur';
+import { styleText } from 'node:util';
 
 const { ART_FOLDER, MUSIC_FILE } = process.env;
 
@@ -41,7 +41,7 @@ export const updateData = async (obj, artists, albums) => {
 
 export const updateWriteSource = paths => {
   let newFiles = 0;
-  console.log(`\tChecking ${kleur.green(paths.size)} source folders`);
+  console.log(`\tChecking ${styleText('green', paths.size)} source folders`);
   const artFolder = fsSync.readdirSync(art_folder);
   paths.forEach((path, mbid) => {
     if (fsSync.existsSync(path)) {
@@ -57,10 +57,10 @@ export const updateWriteSource = paths => {
         }
       }
     } else {
-      console.warn(`⚠️  ${path} ${kleur.red('not found')}`);
+      console.warn(`⚠️  ${path} ${styleText('red', 'not found')}`);
     }
   });
   console.log(
-    `\tUpdated ${kleur.green(newFiles)} source folder${newFiles === 1 ? '' : 's'}`,
+    `\tUpdated ${styleText('green', newFiles)} source folder${newFiles === 1 ? '' : 's'}`,
   );
 };

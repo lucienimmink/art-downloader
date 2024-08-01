@@ -1,5 +1,5 @@
 import * as fs from 'node:fs/promises';
-import kleur from 'kleur';
+import { styleText } from 'node:util';
 
 const { MUSIC_FILE, SOURCE_BASE } = process.env;
 
@@ -82,7 +82,7 @@ export const populateMap = (data, type) => {
     case 'path':
       return populateAlbumPathMap(data);
     default:
-      console.log(`\tCannot handle type ${kleur.red(type)}`);
+      console.log(`\tCannot handle type ${styleText('red', type)}`);
   }
 };
 
@@ -103,7 +103,7 @@ const extractAlbumFromLine = ({ albumartist, artist, album }, map) => {
 const extractAlbumPathFromLine = ({ path, albummbid }, map) => {
   if (!SOURCE_BASE) {
     console.log(
-      `\t${kleur.red('SOURCE_BASE')} not set, see ${kleur.yellow('README.md')}`,
+      `\t${styleText('red', 'SOURCE_BASE')} not set, see ${styleText('yellow', 'README.md')}`,
     );
     process.exit(1);
   }
