@@ -5,6 +5,7 @@
   "main": "index.js",
   "files": [
     "index.js",
+    "app.js",
     "modules"
   ],
   "type": "module",
