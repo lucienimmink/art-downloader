@@ -38,13 +38,14 @@ const readData = async (data, type, print = true) => {
 
   return new Map([...map, ...cachedMap]);
 };
-const handleArtists = async (data, isTurbo = false) => {
-  const map = await readData(data, 'artists');
-  const newMBIDs = await getMBID(map, 'artists', isTurbo);
+const handleArtists = async (data, isTurbo = false, daemonMode = false) => {
+  const map = await readData(data, 'artists', !daemonMode);
+  const newMBIDs = await getMBID(map, 'artists', isTurbo, daemonMode);
   writeMap(map, 'artists');
   const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(
     isTurbo ? newMBIDs : map,
     isTurbo,
+    daemonMode,
   );
   if (mBIDToUrlMap.size !== 0) {
     console.log(
@@ -52,7 +53,7 @@ const handleArtists = async (data, isTurbo = false) => {
     );
     await downloadImageForMBIDs(mBIDToUrlMap);
   }
-  if (artistsWithoutArt.size !== 0) {
+  if (artistsWithoutArt.size !== 0 && !daemonMode) {
     console.log(
       `\tWithout art: ${styleText('red', artistsWithoutArt.size.toString())}`,
     );
@@ -60,21 +61,22 @@ const handleArtists = async (data, isTurbo = false) => {
   await writeMap(artistsWithoutArt, 'artists-without-art');
 };
 
-const handleAlbums = async (data, isTurbo = false) => {
-  const map = await readData(data, 'albums', isTurbo);
-  const newMBIDs = await getMBID(map, 'albums');
+const handleAlbums = async (data, isTurbo = false, daemonMode = false) => {
+  const map = await readData(data, 'albums', !daemonMode);
+  const newMBIDs = await getMBID(map, 'albums', isTurbo, daemonMode);
   writeMap(map, 'albums');
   const { mBIDToUrlMapForAlbums, albumsWithoutArt } = await getArtForAlbums(
     isTurbo ? newMBIDs : map,
     isTurbo,
+    daemonMode,
   );
-  if (mBIDToUrlMapForAlbums.size !== 0) {
+  if (mBIDToUrlMapForAlbums.size !== 0 && !daemonMode) {
     console.log(
       `\tDownload: ${styleText('green', mBIDToUrlMapForAlbums.size.toString())}`,
     );
     await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
   }
-  if (albumsWithoutArt.size !== 0) {
+  if (albumsWithoutArt.size !== 0 && !daemonMode) {
     console.log(
       `\tWithout art: ${styleText('red', albumsWithoutArt.size.toString())}`,
     );
@@ -82,47 +84,53 @@ const handleAlbums = async (data, isTurbo = false) => {
   await writeMap(albumsWithoutArt, 'albums-without-art');
 };
 
-const handleUpdate = async (data, artists, albums) => {
+const handleUpdate = async (data, artists, albums, daemonMode = false) => {
   try {
-    return updateData(data, artists, albums);
+    return updateData(data, artists, albums, daemonMode);
   } catch (e) {
     console.error(e);
   }
 };
 
-const handleWriteSource = paths => {
+const handleWriteSource = (paths, daemonMode = false) => {
   try {
-    return updateWriteSource(paths);
+    return updateWriteSource(paths, daemonMode);
   } catch (e) {
     console.error(e);
   }
 };
 
-export const handle = async (data, type, isTurbo = false) => {
-  console.log(
-    `Handling ${styleText(
-      'cyan',
-      type.replace(/^\w/, c => c.toUpperCase()),
-    )} ${isTurbo ? `in ${styleText('green', 'turbo')} mode` : ``}`,
-  );
+export const handle = async (
+  data,
+  type,
+  isTurbo = false,
+  daemonMode = false,
+) => {
+  if (!daemonMode)
+    console.log(
+      `Handling ${styleText(
+        'cyan',
+        type.replace(/^\w/, c => c.toUpperCase()),
+      )} ${isTurbo ? `in ${styleText('green', 'turbo')} mode` : ``}`,
+    );
   switch (type) {
     case 'artists':
-      await handleArtists(data, isTurbo);
+      await handleArtists(data, isTurbo, daemonMode);
       break;
     case 'albums':
-      await handleAlbums(data, isTurbo);
+      await handleAlbums(data, isTurbo, daemonMode);
       break;
     case 'update':
       const artists = await readData(data, 'artists', false);
       const albums = await readData(data, 'albums', false);
-      await handleUpdate(JSON.parse(data), artists, albums);
+      await handleUpdate(JSON.parse(data), artists, albums, daemonMode);
       break;
     case 'writeSource':
       const paths = await readData(data, 'path', false);
-      handleWriteSource(paths);
+      handleWriteSource(paths, daemonMode);
       break;
     default:
-      console.log(`\tCannot handle type ${styleText('red', type)}`);
+      console.warn(`\tCannot handle type ${styleText('red', type)}`);
   }
 };
 

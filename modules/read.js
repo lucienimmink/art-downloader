@@ -82,7 +82,7 @@ export const populateMap = (data, type) => {
     case 'path':
       return populateAlbumPathMap(data);
     default:
-      console.log(`\tCannot handle type ${styleText('red', type)}`);
+      console.warn(`\tCannot handle type ${styleText('red', type)}`);
   }
 };
 
@@ -102,7 +102,7 @@ const extractAlbumFromLine = ({ albumartist, artist, album }, map) => {
 };
 const extractAlbumPathFromLine = ({ path, albummbid }, map) => {
   if (!SOURCE_BASE) {
-    console.log(
+    console.warn(
       `\t${styleText('red', 'SOURCE_BASE')} not set, see ${styleText('yellow', 'README.md')}`,
     );
     process.exit(1);

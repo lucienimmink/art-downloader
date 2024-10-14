@@ -23,6 +23,7 @@ The following variables should be set in `.env`:
 - `--printAlbumsWithoutArt` will print a list of all albums that have no source for their MBID
 - `--updateLib` will extend the source `MUSIC_FILE` with the MBIDs
 - `--writeSource` will write `cover.[jpg|png|webp|...]` files in the folder per album found in `SOURCE_BASE`
+- `--daemon` output minimal progress to output folder in the file `progress.txt`
 
 > Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
 

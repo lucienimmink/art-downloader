@@ -39,11 +39,12 @@ export const updateData = async (obj, artists, albums) => {
   return await fs.writeFile(MUSIC_FILE || `src/node-music.json`, json);
 };
 
-export const updateWriteSource = paths => {
+export const updateWriteSource = (paths, daemonMode = false) => {
   let newFiles = 0;
-  console.log(
-    `\tChecking ${styleText('green', paths.size.toString())} source folders`,
-  );
+  if (!daemonMode)
+    console.log(
+      `\tChecking ${styleText('green', paths.size.toString())} source folders`,
+    );
   const artFolder = fsSync.readdirSync(art_folder);
   paths.forEach((path, mbid) => {
     if (fsSync.existsSync(path)) {
@@ -62,7 +63,8 @@ export const updateWriteSource = paths => {
       console.warn(`⚠️  ${path} ${styleText('red', 'not found')}`);
     }
   });
-  console.log(
-    `\tUpdated ${styleText('green', newFiles.toString())} source folder${newFiles === 1 ? '' : 's'}`,
-  );
+  if (!daemonMode)
+    console.log(
+      `\tUpdated ${styleText('green', newFiles.toString())} source folder${newFiles === 1 ? '' : 's'}`,
+    );
 };
