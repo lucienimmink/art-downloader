@@ -2,7 +2,7 @@ import fetch from 'node-fetch';
 import ora from 'ora';
 import { styleText } from 'node:util';
 import { asyncForEach, sleep } from './helpers.js';
-import { writeBlob, isAlreadyDownloaded } from './write.js';
+import { writeBlob, isAlreadyDownloaded, writeStatus } from './write.js';
 import timeSpan from './hms.js';
 import { getMetaInfo } from './providers/metainfo.js';
 import { fetchArtForArtist, fetchArtForAlbum } from './fetchArt.js';
@@ -31,13 +31,12 @@ const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
         newMBIDs.set(key, mbid);
         fetched++;
       } catch (e) {
-        if (!daemonMode)
-          console.log(
-            `\n\t\tEncountered an error while getting meta-info for ${styleText(
-              'yellow',
-              key,
-            )} with ${styleText('yellow', key)}`,
-          );
+        console.warn(
+          `\n\t\tEncountered an error while getting meta-info for ${styleText(
+            'yellow',
+            key,
+          )} with ${styleText('yellow', key)}`,
+        );
       }
     }
     count++;
@@ -46,6 +45,8 @@ const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
         spinner.color = 'yellow';
         spinner.text = `\tFetching MBIDs: ${styleText('green', map.size.toString())} - ${count / percent}% done`;
       }
+      if (daemonMode)
+        writeStatus({ artists: { total: map.size, done: count } });
     }
   });
   const stop = new Date().getTime();
@@ -57,6 +58,7 @@ const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
         fetched.toString(),
       )} in ${styleText('yellow', timeSpan(stop - start))}`,
     );
+  if (daemonMode) writeStatus({ artists: { time: timeSpan(stop - start) } });
   return newMBIDs;
 };
 
@@ -100,6 +102,7 @@ const getMBIDForAlbums = async (map, isTurbo = false, daemonMode = false) => {
         spinner.color = 'yellow';
         spinner.text = `\tFetching MBIDs: ${styleText('green', map.size.toString())} - ${count / percent}% done`;
       }
+      if (daemonMode) writeStatus({ albums: { total: map.size, done: count } });
     }
   });
   const stop = new Date().getTime();
@@ -111,6 +114,7 @@ const getMBIDForAlbums = async (map, isTurbo = false, daemonMode = false) => {
         fetched.toString(),
       )} in ${styleText('yellow', timeSpan(stop - start))}`,
     );
+  if (daemonMode) writeStatus({ albums: { time: timeSpan(stop - start) } });
   return newMBIDs;
 };
 
@@ -168,6 +172,7 @@ export const getArtForArtists = async (
           (count / percent).toString(),
         )}%`;
       }
+      if (daemonMode) writeStatus({ artists: { art: map.size, done: count } });
     }
   });
   const stop = new Date().getTime();
@@ -188,6 +193,14 @@ export const getArtForArtists = async (
       \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
       );
   }
+  if (daemonMode)
+    writeStatus({
+      artists: {
+        cached: count - fetched,
+        new: fetched,
+        time: timeSpan(stop - start),
+      },
+    });
   return { mBIDToUrlMap, artistsWithoutArt };
 };
 export const getArtForAlbums = async (
@@ -231,6 +244,7 @@ export const getArtForAlbums = async (
           (count / percent).toString(),
         )}%`;
       }
+      if (daemonMode) writeStatus({ albums: { art: map.size, done: count } });
     }
   });
   const stop = new Date().getTime();
@@ -251,6 +265,14 @@ export const getArtForAlbums = async (
       \t\tTime taken: ${styleText('yellow', timeSpan(stop - start))}`,
       );
   }
+  if (daemonMode)
+    writeStatus({
+      albums: {
+        cached: count - fetch,
+        new: fetch,
+        time: timeSpan(stop - start),
+      },
+    });
   return { mBIDToUrlMapForAlbums, albumsWithoutArt };
 };
 

@@ -8,7 +8,8 @@ The following variables should be set in `.env`:
 
 - `LASTFMAPIKEY`: your last.fm API key. Used to fetch metadata about the found artist. Mainly used for rapid MBID lookup.
 - `FANARTAPIKEY`: your fanart API key. Used for looking up missing art at fanart.
-- `ART_FOLDER`: _optional_ the output folder for the art images; defaults to `./output/art/`.
+- `OUTPUT_FOLDER`: _optional_ the output folder for cache and status files.
+- `ART_FOLDER`: _optional_ the output folder for the art images; defaults to `OUTPUT_FOLDER/art/`.
 - `MUSIC_FILE`: _optional_ full path to your [JSMusicDB](https://www.jsmusicd.com) compatible [music file](https://github.com/lucienimmink/scanner.py); defaults to `./src`.
 - `SOURCE_BASE`: _optional_ the base folder to which the paths in `MUSIC_FILE` resolve. Used when trying to write art to the source folders.
 

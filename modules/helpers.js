@@ -10,7 +10,12 @@ import {
   downloadImageForMBIDs,
   getArtForAlbums,
 } from './fetch.js';
-import { writeMap, updateData, updateWriteSource } from './write.js';
+import {
+  writeMap,
+  updateData,
+  updateWriteSource,
+  writeStatus,
+} from './write.js';
 
 export const asyncForEach = async (array, callback) => {
   for (let index = 0; index < array.length; index++) {
@@ -48,15 +53,17 @@ const handleArtists = async (data, isTurbo = false, daemonMode = false) => {
     daemonMode,
   );
   if (mBIDToUrlMap.size !== 0) {
-    console.log(
-      `\tDownload: ${styleText('green', mBIDToUrlMap.size.toString())}`,
-    );
-    await downloadImageForMBIDs(mBIDToUrlMap);
+    if (!daemonMode)
+      console.log(
+        `\tDownload: ${styleText('green', mBIDToUrlMap.size.toString())}`,
+      );
+    await downloadImageForMBIDs(mBIDToUrlMap, daemonMode);
   }
   if (artistsWithoutArt.size !== 0 && !daemonMode) {
-    console.log(
-      `\tWithout art: ${styleText('red', artistsWithoutArt.size.toString())}`,
-    );
+    if (!daemonMode)
+      console.log(
+        `\tWithout art: ${styleText('red', artistsWithoutArt.size.toString())}`,
+      );
   }
   await writeMap(artistsWithoutArt, 'artists-without-art');
 };
@@ -70,16 +77,18 @@ const handleAlbums = async (data, isTurbo = false, daemonMode = false) => {
     isTurbo,
     daemonMode,
   );
-  if (mBIDToUrlMapForAlbums.size !== 0 && !daemonMode) {
-    console.log(
-      `\tDownload: ${styleText('green', mBIDToUrlMapForAlbums.size.toString())}`,
-    );
-    await downloadImageForMBIDs(mBIDToUrlMapForAlbums);
+  if (mBIDToUrlMapForAlbums.size !== 0) {
+    if (!daemonMode)
+      console.log(
+        `\tDownload: ${styleText('green', mBIDToUrlMapForAlbums.size.toString())}`,
+      );
+    await downloadImageForMBIDs(mBIDToUrlMapForAlbums, daemonMode);
   }
-  if (albumsWithoutArt.size !== 0 && !daemonMode) {
-    console.log(
-      `\tWithout art: ${styleText('red', albumsWithoutArt.size.toString())}`,
-    );
+  if (albumsWithoutArt.size !== 0) {
+    if (!daemonMode)
+      console.log(
+        `\tWithout art: ${styleText('red', albumsWithoutArt.size.toString())}`,
+      );
   }
   await writeMap(albumsWithoutArt, 'albums-without-art');
 };
@@ -113,6 +122,7 @@ export const handle = async (
         type.replace(/^\w/, c => c.toUpperCase()),
       )} ${isTurbo ? `in ${styleText('green', 'turbo')} mode` : ``}`,
     );
+  if (daemonMode) writeStatus({ action: type });
   switch (type) {
     case 'artists':
       await handleArtists(data, isTurbo, daemonMode);

@@ -2,14 +2,15 @@ import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
 import { styleText } from 'node:util';
 
-const { ART_FOLDER, MUSIC_FILE } = process.env;
+const { ART_FOLDER, MUSIC_FILE, OUTPUT_FOLDER } = process.env;
 
-const art_folder = ART_FOLDER || 'output/art';
+const output_folder = OUTPUT_FOLDER || './output';
+const art_folder = ART_FOLDER || `${output_folder}/art`;
 
 export const writeMap = async (map, name = 'artists') => {
   const obj = Object.fromEntries(map);
   const json = JSON.stringify(obj);
-  await fs.writeFile(`output/${name}.json`, json);
+  await fs.writeFile(`${output_folder}/${name}.json`, json);
 };
 
 export const writeBlob = async (key, res, url) => {
@@ -25,6 +26,15 @@ export const isAlreadyDownloaded = async mbid => {
   return !!match;
 };
 
+let locked = false;
+export const writeStatus = async (newStatus, forced = false) => {
+  if (locked && !forced) return;
+  locked = true;
+  const json = JSON.stringify(newStatus);
+  await fs.writeFile(`${output_folder}/status.json`, json);
+  locked = false;
+};
+
 export const updateData = async (obj, artists, albums) => {
   obj.forEach(entry => {
     const key = `${entry.artist}|||${entry.album}`;
@@ -32,7 +42,7 @@ export const updateData = async (obj, artists, albums) => {
       entry.artistmbid = artists.get(entry.artist);
     }
     if (albums.has(key)) {
-      entry.albummbid = JSON.parse(albums.get(key)).mbid;
+      entry.albummbid = JSON.parse(albums.get(key))?.mbid;
     }
   });
   const json = JSON.stringify(obj);
@@ -45,6 +55,7 @@ export const updateWriteSource = (paths, daemonMode = false) => {
     console.log(
       `\tChecking ${styleText('green', paths.size.toString())} source folders`,
     );
+  if (daemonMode) writeStatus({ folders: { total: paths.size } });
   const artFolder = fsSync.readdirSync(art_folder);
   paths.forEach((path, mbid) => {
     if (fsSync.existsSync(path)) {
@@ -67,4 +78,5 @@ export const updateWriteSource = (paths, daemonMode = false) => {
     console.log(
       `\tUpdated ${styleText('green', newFiles.toString())} source folder${newFiles === 1 ? '' : 's'}`,
     );
+  if (daemonMode) writeStatus({ folders: { new: newFiles } });
 };

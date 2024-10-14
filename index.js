@@ -4,6 +4,7 @@ import { readMusicFile, readOutputfile } from './modules/read.js';
 import { printTable } from './modules/print.js';
 import timeSpan from './modules/hms.js';
 import { handle } from './modules/helpers.js';
+import { writeStatus } from './modules/write.js';
 
 const skipArtists = !!process.env.npm_config_skipArtists;
 const skipAlbums = !!process.env.npm_config_skipAlbums;
@@ -20,6 +21,7 @@ readPackage().then(async () => {
   readPackage().then(async ({ name, version }) => {
     if (!daemonMode)
       console.log(`Starting ${styleText('green', `${name} v${version}`)}\n`);
+    if (daemonMode) writeStatus({ status: 'running' });
     let printtype = '';
     let printFilter = '';
 
@@ -65,5 +67,6 @@ readPackage().then(async () => {
     const stop = new Date().getTime();
     if (!daemonMode)
       console.log(`Finished in ${styleText('yellow', timeSpan(stop - start))}`);
+    if (daemonMode) writeStatus({ status: 'done' }, true);
   });
 });
