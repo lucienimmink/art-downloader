@@ -33,7 +33,7 @@
     "cli-table": "^0.3.11",
     "node-fetch": "^3.1.0",
     "ora": "^9.0.0",
-    "read-pkg": "^9.0.0"
+    "read-pkg": "^10.0.0"
   },
   "prettier": {
     "singleQuote": true,
