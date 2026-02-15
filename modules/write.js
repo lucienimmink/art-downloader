@@ -63,11 +63,14 @@ export const updateWriteSource = (paths, daemonMode = false) => {
       if (artFile.length === 1) {
         const fileType = artFile[0].split('.').pop();
         if (!fsSync.existsSync(`${path}/cover.${fileType}`)) {
-          fsSync.copyFileSync(
-            `${art_folder}/${mbid}.${fileType}`,
-            `${path}/cover.${fileType}`,
-          );
-          newFiles++;
+          try {
+            // copy via a buffer to avoid issues with cross-device copying (e.g. when the source is on a mounted drive)
+            const data = fsSync.readFileSync(`${art_folder}/${mbid}.${fileType}`);
+            fsSync.writeFileSync(`${path}/cover.${fileType}`, data);
+            newFiles++;
+          } catch (err) {
+            console.error(`${styleText('red', 'Error')} copying file ${mbid}.${fileType} to ${path}/cover.${fileType}: ${err.toString()}`);
+          }
         }
       }
     } else {
