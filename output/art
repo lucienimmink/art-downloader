@@ -1,0 +1,1 @@
+/run/user/1000/gvfs/smb-share:server=diskstation.local,share=docker,user=lucien/node-mp3stream/cache
