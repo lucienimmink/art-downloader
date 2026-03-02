@@ -222,8 +222,21 @@ export const getArtForAlbums = async (
 
   await asyncForEach(Array.from(map.keys()), async key => {
     const json = map.get(key);
-    const { mbid, url } = JSON.parse(json);
-    const hasMBID = !!mbid;
+    let hasMBID = false;
+    let mbid = null;
+    let url = null;
+    try {
+      mbid = JSON.parse(json)?.mbid;
+      url = JSON.parse(json)?.url;
+      hasMBID = !!mbid;
+    } catch (e) {
+      console.warn(
+        `\n\t\tEncountered an error while parsing meta-info for ${styleText(
+          'yellow',
+          key,
+        )} with ${styleText('yellow', json)}`,
+      );
+    }
     if (hasMBID && url && !(await isAlreadyDownloaded(mbid))) {
       const artist = key.split('|||').shift();
       const album = key.split('|||').pop();
