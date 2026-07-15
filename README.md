@@ -15,18 +15,18 @@ The following variables should be set in `.env`:
 
 ## Options
 
-- `--skipArtists` will skip all processing for artists.
-- `--skipAlbums` will skip all processing for albums.
-- `--turbo` only download art for newly fetched MBIDs.
-- `--printArtistsWithoutArt` will print a list of all artists and their MBID for which no art is found.
-- `--printArtists` will print a list of all artists and their MBID.
-- `--printAlbums` will print a list of all albums and the URL to the source of the art
-- `--printAlbumsWithoutArt` will print a list of all albums that have no source for their MBID
-- `--updateLib` will extend the source `MUSIC_FILE` with the MBIDs
-- `--writeSource` will write `cover.[jpg|png|webp|...]` files in the folder per album found in `SOURCE_BASE`
-- `--daemon` output minimal progress to output folder in the file `progress.txt`
+Add any of these to your `.env` file any value will do
 
-> Tip: you can export the output of `--printArtists` and `--printAlbums` to a file. For example: `npm run start --printAlbums > albums.txt`
+- `SKIPARTISTS` will skip all processing for artists.
+- `SKIPALBUMS` will skip all processing for albums.
+- `TURBO_MODE` only download art for newly fetched MBIDs.
+- `PRINT_ARTISTS_WITHOUT_ART` will print a list of all artists and their MBID for which no art is found.
+- `PRINT_ARTISTS` will print a list of all artists and their MBID.
+- `PRINT_ALBUMS` will print a list of all albums and the URL to the source of the art
+- `PRINT_ALBUMS_WITHOUT_ART` will print a list of all albums that have no source for their MBID
+- `DAEMON_MODE` output minimal progress to output folder in the file `progress.txt`
+
+> Tip: you can export the output of `PRINT_ARTISTS` and `PRINT_ALBUMS` to a file. For example: `npm run start > albums.txt`
 
 ## Output
 
