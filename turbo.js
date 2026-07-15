@@ -7,19 +7,18 @@ import { handle } from './modules/helpers.js';
 import { writeStatus } from './modules/write.js';
 
 /*
-  From NPM 12 onwards npm_config variables cannot be read anymore.
-  Feel free to give me a hint on how to fix this.
+  cannot read npm_config variables anymore in npm 12. For the turbo mode we predefine some variables
 */
-const skipArtists = !!process.env.npm_config_skipArtists;
-const skipAlbums = !!process.env.npm_config_skipAlbums;
-const printArtistsWithoutArt = !!process.env.npm_config_printArtistsWithoutArt;
-const printArtists = !!process.env.npm_config_printArtists;
-const printAlbumsWithoutArt = !!process.env.npm_config_printAlbumsWithoutArt;
-const printAlbums = !!process.env.npm_config_printAlbums;
-const updateLib = !!process.env.npm_config_updateLib;
-const writeSource = !!process.env.npm_config_writeSource;
-const isTurbo = !!process.env.npm_config_turbo;
-const daemonMode = !!process.env.npm_config_daemon;
+const skipArtists = false;
+const skipAlbums = false;
+const printArtistsWithoutArt = false;
+const printArtists = false;
+const printAlbumsWithoutArt = false;
+const printAlbums = false;
+const updateLib = false;
+const writeSource = false;
+const isTurbo = true;
+const daemonMode = false;
 
 readPackage().then(async ({ name, version }) => {
   if (!daemonMode)

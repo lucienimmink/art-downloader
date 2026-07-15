@@ -6,6 +6,7 @@
   "files": [
     "index.js",
     "app.js",
+    "turbo.js",
     "modules"
   ],
   "type": "module",
@@ -16,6 +17,7 @@
     "format": "npm run format:prettier",
     "dev": "node --env-file=.env index.js",
     "start": "node --env-file=.env index.js",
+    "turbo": "node --env-file=.env turbo.js",
     "postversion": "git push --follow-tags",
     "prepare": "husky install"
   },
