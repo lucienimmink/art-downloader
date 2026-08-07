@@ -32,9 +32,9 @@
   "homepage": "https://github.com/lucienimmink/art-downloader#readme",
   "dependencies": {
     "cli-table": "^0.3.11",
-    "node-fetch": "^3.1.0",
-    "ora": "^9.0.0",
-    "read-pkg": "^10.0.0"
+    "node-fetch": "^3.3.2",
+    "ora": "^9.4.1",
+    "read-pkg": "^10.1.0"
   },
   "prettier": {
     "singleQuote": true,
@@ -47,8 +47,8 @@
     ]
   },
   "devDependencies": {
-    "husky": "^9.0.0",
-    "lint-staged": "^17.0.0",
-    "prettier": "^3.0.0"
+    "husky": "^9.1.7",
+    "lint-staged": "^17.3.0",
+    "prettier": "^3.9.6"
   }
 }
