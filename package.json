@@ -50,7 +50,6 @@
     "husky": "^9.1.7",
     "lint-staged": "^17.4.1",
     "prettier": "^3.9.6"
-<<<<<<< HEAD
   },
   "devEngines": {
     "runtime": {
@@ -58,7 +57,5 @@
       "version": "^24.19.0",
       "onFail": "download"
     }
-=======
->>>>>>> ef5cd73 (Update deps)
   }
 }
