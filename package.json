@@ -13,8 +13,8 @@
   "scripts": {
     "lint:prettier": "prettier \"**/*.js\" --check --ignore-path .gitignore",
     "format:prettier": "prettier \"**/*.js\" --write --ignore-path .gitignore",
-    "lint": "npm run lint:prettier",
-    "format": "npm run format:prettier",
+    "lint": "pnpm run lint:prettier",
+    "format": "pnpm run format:prettier",
     "dev": "node --env-file=.env index.js",
     "start": "node --env-file=.env index.js",
     "postversion": "git push --follow-tags",
@@ -42,8 +42,8 @@
   },
   "lint-staged": {
     "*.js": [
-      "npm run lint",
-      "npm run format"
+      "pnpm run lint",
+      "pnpm run format"
     ]
   },
   "devDependencies": {
