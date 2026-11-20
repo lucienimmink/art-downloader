@@ -1,5 +1,4 @@
 import { fetchWithTimeout } from '../../fetchWithTimeout.js';
-import { sleep } from './../../helpers.js';
 
 const fetchArt = async ({ artist, album }) => {
   const response = await fetchWithTimeout(
@@ -11,8 +10,7 @@ const fetchArt = async ({ artist, album }) => {
     if (data && total > 0) {
       return data[0].cover_xl;
     }
-    if (error.code === 4) {
-      await sleep(100);
+    if (error?.code === 4) {
       return await fetchArt({ artist, album });
     }
   }

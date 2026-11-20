@@ -1,5 +1,6 @@
 import * as fs from 'node:fs/promises';
 import * as fsSync from 'node:fs';
+import { pipeline } from 'node:stream/promises';
 import { styleText } from 'node:util';
 
 const { ART_FOLDER, MUSIC_FILE, OUTPUT_FOLDER } = process.env;
@@ -13,17 +14,33 @@ export const writeMap = async (map, name = 'artists') => {
   await fs.writeFile(`${output_folder}/${name}.json`, json);
 };
 
+let downloadedFiles;
+
 export const writeBlob = async (key, res, url) => {
   const fileType = url.split('.').pop();
-  res.body.pipe(fsSync.createWriteStream(`${art_folder}/${key}.${fileType}`));
+  await pipeline(
+    res.body,
+    fsSync.createWriteStream(`${art_folder}/${key}.${fileType}`),
+  );
+  downloadedFiles?.add(`${key}.${fileType}`);
+};
+
+const loadDownloadedFiles = async () => {
+  if (downloadedFiles) return downloadedFiles;
+  try {
+    downloadedFiles = new Set(await fs.readdir(art_folder));
+  } catch (error) {
+    downloadedFiles = new Set();
+  }
+  return downloadedFiles;
 };
 
 export const isAlreadyDownloaded = async mbid => {
-  const alreadyDownloadedFiles = await fs.readdir(art_folder);
-  const match = alreadyDownloadedFiles.find(elemement =>
-    elemement.includes(mbid),
-  );
-  return !!match;
+  const files = await loadDownloadedFiles();
+  for (const file of files) {
+    if (file.includes(mbid)) return true;
+  }
+  return false;
 };
 
 let locked = false;

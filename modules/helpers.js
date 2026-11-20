@@ -18,9 +18,26 @@ import {
 } from './write.js';
 
 export const asyncForEach = async (array, callback) => {
-  for (let index = 0; index < array.length; index++) {
-    await callback(array[index], index, array);
-  }
+  const configuredLimit = Number.parseInt(
+    process.env.ART_DOWNLOADER_CONCURRENCY || '8',
+    10,
+  );
+  const limit =
+    Number.isFinite(configuredLimit) && configuredLimit > 0
+      ? configuredLimit
+      : 8;
+  let index = 0;
+
+  const worker = async () => {
+    while (index < array.length) {
+      const currentIndex = index++;
+      await callback(array[currentIndex], currentIndex, array);
+    }
+  };
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, array.length) }, worker),
+  );
 };
 
 export const sleep = milliseconds => {
@@ -46,7 +63,7 @@ const readData = async (data, type, print = true) => {
 const handleArtists = async (data, isTurbo = false, daemonMode = false) => {
   const map = await readData(data, 'artists', !daemonMode);
   const newMBIDs = await getMBID(map, 'artists', isTurbo, daemonMode);
-  writeMap(map, 'artists');
+  await writeMap(map, 'artists');
   const { mBIDToUrlMap, artistsWithoutArt } = await getArtForArtists(
     isTurbo ? newMBIDs : map,
     isTurbo,
@@ -71,7 +88,7 @@ const handleArtists = async (data, isTurbo = false, daemonMode = false) => {
 const handleAlbums = async (data, isTurbo = false, daemonMode = false) => {
   const map = await readData(data, 'albums', !daemonMode);
   const newMBIDs = await getMBID(map, 'albums', isTurbo, daemonMode);
-  writeMap(map, 'albums');
+  await writeMap(map, 'albums');
   const { mBIDToUrlMapForAlbums, albumsWithoutArt } = await getArtForAlbums(
     isTurbo ? newMBIDs : map,
     isTurbo,

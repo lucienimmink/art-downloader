@@ -1,11 +1,12 @@
 import fetch from 'node-fetch';
 import ora from 'ora';
 import { styleText } from 'node:util';
-import { asyncForEach, sleep } from './helpers.js';
+import { asyncForEach } from './helpers.js';
 import { writeBlob, isAlreadyDownloaded, writeStatus } from './write.js';
 import timeSpan from './hms.js';
 import { getMetaInfo } from './providers/metainfo.js';
 import { fetchArtForArtist, fetchArtForAlbum } from './fetchArt.js';
+import { fetchWithTimeout } from './fetchWithTimeout.js';
 
 const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
   const start = new Date().getTime();
@@ -35,7 +36,7 @@ const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
           `\n\t\tEncountered an error while getting meta-info for ${styleText(
             'yellow',
             key,
-          )} with ${styleText('yellow', key)}`,
+          )}: ${styleText('yellow', e.message)}`,
         );
       }
     }
@@ -92,7 +93,7 @@ const getMBIDForAlbums = async (map, isTurbo = false, daemonMode = false) => {
           `\n\t\tEncountered an error while getting meta-info for ${styleText(
             'yellow',
             artist,
-          )} - ${styleText('yellow', salbum)}`,
+          )} - ${styleText('yellow', e.message)}`,
         );
       }
     }
@@ -241,7 +242,7 @@ export const getArtForAlbums = async (
       const artist = key.split('|||').shift();
       const album = key.split('|||').pop();
       try {
-        const url = await fetchArtForAlbum({ artist, album, mbid });
+        const url = await fetchArtForAlbum({ artist, album, id: mbid });
         mBIDToUrlMapForAlbums.set(mbid, url);
         fetch++;
       } catch (ee) {
@@ -290,11 +291,10 @@ export const getArtForAlbums = async (
 };
 
 const getArtistMBID = async artist => {
-  await sleep(1000); // https://wiki.musicbrainz.org/MusicBrainz_API/Rate_Limiting
   const searchParams = new URLSearchParams();
   searchParams.set('fmt', 'json');
   searchParams.set('query', artist);
-  const response = await fetch(
+  const response = await fetchWithTimeout(
     `https://musicbrainz.org/ws/2/artist/?${searchParams}`,
   );
   const { artists } = await response.json();
@@ -305,11 +305,10 @@ export const downloadImageForMBIDs = async (map, daemonMode = false) => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
     if (url) {
-      sleep(100);
       if (!daemonMode)
         console.log(`\t\tDownloading: ${styleText('green', url)} ...`);
       const res = await fetch(url);
-      writeBlob(key, res, url);
+      await writeBlob(key, res, url);
     }
   });
 };

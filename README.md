@@ -1,6 +1,6 @@
 # Art-downloader
 
-Download artist art based on their [MBID](https://musicbrainz.org/). This node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), whose structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist both [fanart](https://fanart.tv/) and [Deezer](https://www.deezer.com/) are queried to find art for the artist. If a lot of artists need to be queried a rate limit can occur. If that is the case the program will sleep for 1 minute and then try again. Please be patient while we do our best to find all the art.
+Download artist art based on their [MBID](https://musicbrainz.org/). This Node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), whose structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist, providers such as [fanart](https://fanart.tv/) and [Deezer](https://www.deezer.com/) are queried to find art.
 
 ## Config
 
@@ -12,6 +12,13 @@ The following variables should be set in `.env`:
 - `ART_FOLDER`: _optional_ the output folder for the art images; defaults to `OUTPUT_FOLDER/art/`.
 - `MUSIC_FILE`: _optional_ full path to your [JSMusicDB](https://www.jsmusicd.com) compatible [music file](https://github.com/lucienimmink/scanner.py); defaults to `./src`.
 - `SOURCE_BASE`: _optional_ the base folder to which the paths in `MUSIC_FILE` resolve. Used when trying to write art to the source folders.
+- `ART_DOWNLOADER_CONCURRENCY`: _optional_ maximum number of tasks processed concurrently. Must be a positive integer. The default is `8`. Lower values reduce provider and system load; higher values can speed up network-bound work but may trigger provider limits.
+
+Example:
+
+```dotenv
+ART_DOWNLOADER_CONCURRENCY=4
+```
 
 ## Options
 
@@ -27,6 +34,21 @@ Add any of these to your `.env` file any value will do
 - `DAEMON_MODE` output minimal progress to output folder in the file `progress.txt`
 
 > Tip: you can export the output of `PRINT_ARTISTS` and `PRINT_ALBUMS` to a file. For example: `npm run start > albums.txt`
+
+## Performance
+
+The application processes network-bound work with a bounded worker pool:
+
+- Artist, album and image operations run in parallel, but at most `ART_DOWNLOADER_CONCURRENCY` tasks are active at once.
+- If `ART_DOWNLOADER_CONCURRENCY` is missing, zero or invalid, the application uses `8`.
+- The cache of downloaded art files is loaded once and retained in memory instead of reading the art directory for every MBID.
+- Downloads are streamed directly to disk and the application waits until each download is complete before continuing.
+- Requests are paced per hostname. MusicBrainz requests wait at least 1 second between starts; other providers wait at least 100 milliseconds.
+- Deezer rate-limit responses no longer use separate provider sleeps; each provider uses the shared request limiter.
+- Album lookups reuse the already resolved album MBID instead of resolving it again for the art provider.
+- Cached MBID maps and album maps are written completely before art processing continues.
+
+These changes preserve the existing providers and output files; they only change concurrency and I/O timing.
 
 ## Output
 
