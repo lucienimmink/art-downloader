@@ -1,12 +1,27 @@
 import fetch from 'node-fetch';
 import ora from 'ora';
 import { styleText } from 'node:util';
-import { asyncForEach } from './helpers.js';
+import { asyncForEach, sleep } from './helpers.js';
 import { writeBlob, isAlreadyDownloaded, writeStatus } from './write.js';
 import timeSpan from './hms.js';
-import { getMetaInfo } from './providers/metainfo.js';
+import {
+  getMetaInfo,
+  getMBID as getArtistMBIDFromMusicBrainz,
+} from './providers/metainfo.js';
 import { fetchArtForArtist, fetchArtForAlbum } from './fetchArt.js';
-import { fetchWithTimeout } from './fetchWithTimeout.js';
+
+const getDownloadRetryDelay = (retryAfter, attempt) => {
+  if (retryAfter) {
+    const seconds = Number(retryAfter);
+    const retryAt = Number.isFinite(seconds)
+      ? Date.now() + seconds * 1000
+      : Date.parse(retryAfter);
+    if (Number.isFinite(retryAt)) {
+      return Math.min(Math.max(0, retryAt - Date.now()), 30_000);
+    }
+  }
+  return 1000 * 2 ** attempt;
+};
 
 const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
   const start = new Date().getTime();
@@ -23,17 +38,22 @@ const getMBIDForArtists = async (map, isTurbo = false, daemonMode = false) => {
     const hasMBID = !!map.get(key);
     if (!hasMBID) {
       try {
-        const { artist } = await getMetaInfo({ artist: key });
-        let mbid = artist?.mbid;
+        const mbid = await getArtistMBIDFromMusicBrainz(key);
         if (!mbid) {
-          mbid = await getArtistMBID(key);
+          const searchedProviders = process.env.LASTFMAPIKEY
+            ? 'MusicBrainz or Last.fm'
+            : 'MusicBrainz';
+          console.warn(
+            `\n\t\tNo artist MBID found for ${styleText('yellow', key)} in ${searchedProviders}`,
+          );
+        } else {
+          map.set(key, mbid);
+          newMBIDs.set(key, mbid);
+          fetched++;
         }
-        map.set(key, mbid);
-        newMBIDs.set(key, mbid);
-        fetched++;
       } catch (e) {
         console.warn(
-          `\n\t\tEncountered an error while getting meta-info for ${styleText(
+          `\n\t\tFailed to resolve MBID for ${styleText(
             'yellow',
             key,
           )}: ${styleText('yellow', e.message)}`,
@@ -90,10 +110,10 @@ const getMBIDForAlbums = async (map, isTurbo = false, daemonMode = false) => {
         fetched++;
       } catch (e) {
         console.warn(
-          `\n\t\tEncountered an error while getting meta-info for ${styleText(
+          `\n\t\tEncountered an error while getting meta-info for album ${styleText(
             'yellow',
-            artist,
-          )} - ${styleText('yellow', e.message)}`,
+            `${artist} - ${salbum}`,
+          )}: ${styleText('yellow', e.message)}`,
         );
       }
     }
@@ -290,25 +310,50 @@ export const getArtForAlbums = async (
   return { mBIDToUrlMapForAlbums, albumsWithoutArt };
 };
 
-const getArtistMBID = async artist => {
-  const searchParams = new URLSearchParams();
-  searchParams.set('fmt', 'json');
-  searchParams.set('query', artist);
-  const response = await fetchWithTimeout(
-    `https://musicbrainz.org/ws/2/artist/?${searchParams}`,
-  );
-  const { artists } = await response.json();
-  return artists[0].id;
-};
-
 export const downloadImageForMBIDs = async (map, daemonMode = false) => {
   await asyncForEach(Array.from(map.keys()), async key => {
     const url = map.get(key);
     if (url) {
       if (!daemonMode)
         console.log(`\t\tDownloading: ${styleText('green', url)} ...`);
-      const res = await fetch(url);
-      await writeBlob(key, res, url);
+      let downloaded = false;
+      for (let attempt = 0; attempt < 4 && !downloaded; attempt++) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 30_000);
+        try {
+          const res = await fetch(url, { signal: controller.signal });
+          if (!res.ok) {
+            const error = new Error(`Image server returned HTTP ${res.status}`);
+            error.status = res.status;
+            error.retryAfter = res.headers.get('retry-after');
+            res.body?.destroy();
+            throw error;
+          }
+          await writeBlob(key, res, url);
+          downloaded = true;
+        } catch (error) {
+          const retryable =
+            [408, 429, 500, 502, 503, 504].includes(error.status) ||
+            [
+              'ECONNRESET',
+              'ETIMEDOUT',
+              'ECONNREFUSED',
+              'EPIPE',
+              'EAI_AGAIN',
+            ].includes(error.code) ||
+            error.name === 'AbortError';
+          if (!retryable || attempt === 3) {
+            console.warn(
+              `\n\t\tFailed to download artwork ${styleText('yellow', key)}: ${styleText('yellow', error.message)}`,
+            );
+            break;
+          }
+
+          await sleep(getDownloadRetryDelay(error.retryAfter, attempt));
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
     }
   });
 };

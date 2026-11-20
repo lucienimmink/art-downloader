@@ -8,8 +8,9 @@ const fetchArt = async mbid => {
   if (response.status === 200) {
     const json = await response.json();
     const { images } = json;
-    const front = images.filter(image => image.types.includes('Front'));
-    return front[0].thumbnails['500'];
+    const front =
+      images?.find(image => image.types?.includes('Front')) || images?.[0];
+    if (front?.image) return front.image;
   }
   throw Error('no art found in provider audiodb');
 };

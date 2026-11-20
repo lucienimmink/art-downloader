@@ -1,12 +1,12 @@
 # Art-downloader
 
-Download artist art based on their [MBID](https://musicbrainz.org/). This Node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), whose structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). For each found artist, providers such as [fanart](https://fanart.tv/) and [Deezer](https://www.deezer.com/) are queried to find art.
+Download artist art based on their [MBID](https://musicbrainz.org/). This Node.js program reads a JSON-based music file as used by [JSMusicDB](https://www.jsmusicd.com), whose structure is based on [scanner.py](https://github.com/lucienimmink/scanner.py). Missing artist MBIDs are resolved through MusicBrainz first, with Last.fm as a fallback when MusicBrainz has no usable result. Album metadata and cover URLs also use Last.fm, and art providers such as [fanart](https://fanart.tv/) and [Deezer](https://www.deezer.com/) are queried to find art.
 
 ## Config
 
 The following variables should be set in `.env`:
 
-- `LASTFMAPIKEY`: your last.fm API key. Used to fetch metadata about the found artist. Mainly used for rapid MBID lookup.
+- `LASTFMAPIKEY`: your Last.fm API key. Used to fetch album metadata and cover URLs, and as a fallback for artist MBIDs not found by MusicBrainz.
 - `FANARTAPIKEY`: your fanart API key. Used for looking up missing art at fanart.
 - `OUTPUT_FOLDER`: _optional_ the output folder for cache and status files.
 - `ART_FOLDER`: _optional_ the output folder for the art images; defaults to `OUTPUT_FOLDER/art/`.
@@ -39,14 +39,17 @@ Add any of these to your `.env` file any value will do
 
 The application processes network-bound work with a bounded worker pool:
 
-- Artist, album and image operations run in parallel, but at most `ART_DOWNLOADER_CONCURRENCY` tasks are active at once.
+- Artist, album and image operations run in parallel, but at most `ART_DOWNLOADER_CONCURRENCY` tasks are active at once. Within each image lookup, providers are tried sequentially in configured priority order.
 - If `ART_DOWNLOADER_CONCURRENCY` is missing, zero or invalid, the application uses `8`.
 - The cache of downloaded art files is loaded once and retained in memory instead of reading the art directory for every MBID.
 - Downloads are streamed directly to disk and the application waits until each download is complete before continuing.
 - Requests are paced per hostname. MusicBrainz requests wait at least 1 second between starts; other providers wait at least 100 milliseconds.
+- MusicBrainz requests use an identifiable application/version and project URL in the `User-Agent`, a 10-second timeout, and retry temporary network failures and HTTP 429/502/503/504 responses up to four times, using exponential backoff and the server's `Retry-After` header when available. The User-Agent identifies the application but does not raise MusicBrainz's source-IP rate limit.
+- If MusicBrainz returns no artist MBID or fails, the artist lookup tries Last.fm when an API key is configured. A not-found warning is printed only when neither provider returns an MBID.
 - Deezer rate-limit responses no longer use separate provider sleeps; each provider uses the shared request limiter.
 - Album lookups reuse the already resolved album MBID instead of resolving it again for the art provider.
 - Cached MBID maps and album maps are written completely before art processing continues.
+- Album artwork is tried at full resolution from MusicBrainz's Cover Art Archive first, then Deezer, then Last.fm. Artist artwork uses Fanart.tv with the MusicBrainz MBID first, then Deezer; Last.fm is never used as an artist-art provider. MusicBrainz itself does not host artist artwork, so the MBID-based Fanart.tv service is used for that first choice.
 
 These changes preserve the existing providers and output files; they only change concurrency and I/O timing.
 

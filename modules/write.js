@@ -18,10 +18,23 @@ let downloadedFiles;
 
 export const writeBlob = async (key, res, url) => {
   const fileType = url.split('.').pop();
-  await pipeline(
-    res.body,
-    fsSync.createWriteStream(`${art_folder}/${key}.${fileType}`),
-  );
+  await fs.mkdir(art_folder, { recursive: true });
+  const filePath = `${art_folder}/${key}.${fileType}`;
+  try {
+    await pipeline(res.body, fsSync.createWriteStream(filePath));
+  } catch (error) {
+    try {
+      await fs.unlink(filePath);
+    } catch (cleanupError) {
+      if (cleanupError.code !== 'ENOENT') {
+        throw new AggregateError(
+          [error, cleanupError],
+          `Failed to remove incomplete artwork file ${filePath}`,
+        );
+      }
+    }
+    throw error;
+  }
   downloadedFiles?.add(`${key}.${fileType}`);
 };
 
@@ -30,6 +43,7 @@ const loadDownloadedFiles = async () => {
   try {
     downloadedFiles = new Set(await fs.readdir(art_folder));
   } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
     downloadedFiles = new Set();
   }
   return downloadedFiles;
